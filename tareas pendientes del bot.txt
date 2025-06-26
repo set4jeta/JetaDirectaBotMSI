@@ -1,0 +1,6 @@
+1- agregar multiples servidores
+2- ver una forma de tener el tiempo de partida (?) seria con algun comando
+3- crear comando que liste los jugadores (?)
+4- endpoint 
+https://dpm.lol/v1/leaderboards/custom/f1a01cf4-0352-4dac-9c6d-e8e1e44db67a con cierta data que interesa extraer para crear el archivo accounts.py
+5- intentar hacer que de alguna forma se pueda usar la key del observer o lo que sea para tener el enlace a la partida para espectar ya sea en directo o como repetición
