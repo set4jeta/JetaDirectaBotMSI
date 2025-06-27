@@ -15,7 +15,7 @@ async def update_accounts_with_puuids():
         tag_line = riot_id["tag_line"]
 
         print(f"Verificando puuid para {player['name']} ({game_name}#{tag_line})...")
-        puuid_real = await get_puuid_from_riot_id(game_name, tag_line)
+        puuid_real, status = await get_puuid_from_riot_id(game_name, tag_line)
         puuid_guardado = player.get("puuid")
 
         if puuid_real:
@@ -27,7 +27,7 @@ async def update_accounts_with_puuids():
             else:
                 print(f"✅ PUUID correcto para {player['name']}")
         else:
-            print(f"❌ No se pudo obtener el PUUID para {player['name']} ({game_name}#{tag_line})")
+            print(f"❌ No se pudo obtener el PUUID para {player['name']} ({game_name}#{tag_line}) [status={status}]")
 
         updated_players.append(player)
 
@@ -43,16 +43,12 @@ async def update_accounts_with_puuids():
         content += "    },\n"
     content += "]\n"
 
- 
     # Guarda también en JSON
     json_path = os.path.join(os.path.dirname(__file__), "accounts.json")
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(updated_players, f, ensure_ascii=False, indent=2)
 
-    print("✅ accounts.py actualizado con puuids")
     print("✅ accounts.json actualizado con puuids")    
-
-   
 
 if __name__ == "__main__":
     asyncio.run(update_accounts_with_puuids())

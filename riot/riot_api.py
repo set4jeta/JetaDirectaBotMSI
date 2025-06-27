@@ -13,14 +13,14 @@ NA_BASE_URL = "https://na1.api.riotgames.com"
 
 # ————————————————
 
-async def get_puuid_from_riot_id(game_name: str, tag_line: str) -> str | None:
+async def get_puuid_from_riot_id(game_name: str, tag_line: str) -> tuple[str | None, int]:
     url = f"{RIOT_BASE_URL}/riot/account/v1/accounts/by-riot-id/{game_name}/{tag_line}"
     async with aiohttp.ClientSession() as session:
-        async with session.get(url, headers=HEADERS) as resp: # type: ignore # type: ignore
+        async with session.get(url, headers=HEADERS) as resp: # type: ignore
             if resp.status == 200:
                 data = await resp.json()
-                return data.get("puuid")
-            return None
+                return data.get("puuid"), 200
+            return None, resp.status
 
 # ————————————————
 
@@ -34,15 +34,13 @@ async def get_summoner_by_puuid(puuid: str) -> dict | None:
 
 # ————————————————
 
-async def get_active_game(puuid: str) -> dict | None:
+async def get_active_game(puuid: str) -> tuple[dict | None, int]:
     url = f"{NA_BASE_URL}/lol/spectator/v5/active-games/by-summoner/{puuid}"
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=HEADERS) as resp: # type: ignore
             if resp.status == 200:
-                return await resp.json()
-            elif resp.status == 404:
-                return None  # No está en partida
-            return None
+                return await resp.json(), 200
+            return None, resp.status
 
 # ————————————————
 
@@ -68,6 +66,9 @@ async def is_valid_puuid(puuid: str) -> bool:
     url = f"{NA_BASE_URL}/lol/summoner/v4/summoners/by-puuid/{puuid}"
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=HEADERS) as resp: # type: ignore
+            if resp.status == 429:
+                print(f"[DEBUG] is_valid_puuid: RATE LIMIT (429) para {puuid}")
+                return True  # No marcar como inválido, solo saltar
             if resp.status != 200:
                 print(f"[DEBUG] is_valid_puuid: status={resp.status} para {puuid}")
             return resp.status == 200

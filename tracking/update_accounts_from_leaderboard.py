@@ -16,15 +16,21 @@ def fetch_players():
     return data.get("players", [])
 
 def build_account_entry(player):
-    return {
+    entry = {
         'riot_id': {
             'game_name': player["gameName"],
             'tag_line': player["tagLine"]
         },
         'team': player.get("team", ""),
         'name': player.get("displayName", player["gameName"]),
-        'puuid': player["puuid"]
+        # NO GUARDES 'puuid' DEL ENDPOINT
     }
+    # Si tiene rank, guárdalo, pero SIN el puuid interno
+    if "rank" in player and player["rank"]:
+        rank = dict(player["rank"])
+        rank.pop("puuid", None)
+        entry["rank"] = rank
+    return entry
 
 def main():
     # 1. Carga los jugadores actuales (manuales y automáticos)
@@ -41,6 +47,16 @@ def main():
     # 3. Fusiona: agrega los que no están (por riot_id y tag_line)
     def riot_id_key(p):
         return (p["riot_id"]["game_name"].lower(), p["riot_id"]["tag_line"].lower())
+
+    # --- CAMBIO AQUÍ ---
+    # Crea un dict de los jugadores actuales por riot_id
+    current_by_riot_id = {riot_id_key(p): p for p in current_players}
+
+    # Para cada jugador nuevo, si ya existe y tiene puuid, consérvalo
+    for entry in entries:
+        key = riot_id_key(entry)
+        if key in current_by_riot_id and "puuid" in current_by_riot_id[key]:
+            entry["puuid"] = current_by_riot_id[key]["puuid"]
 
     existing_keys = {riot_id_key(p): p for p in entries}
     # Agrega los manuales que no están en el endpoint

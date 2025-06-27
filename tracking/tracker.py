@@ -9,7 +9,23 @@ from utils.spectate_bat import generar_bat_spectate
 import nextcord 
 
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "notify_config.json")
+RETRY_PATH = os.path.join(os.path.dirname(__file__), "puuid_retry_queue.json")
 announced_games = set()
+
+def load_retry_queue():
+    if os.path.exists(RETRY_PATH):
+        with open(RETRY_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return []
+
+def save_retry_queue(queue):
+    with open(RETRY_PATH, "w", encoding="utf-8") as f:
+        json.dump(queue, f, ensure_ascii=False, indent=2)
+
+
+
+
+
 
 def load_channel_ids():
     if not os.path.exists(CONFIG_PATH):
@@ -31,6 +47,16 @@ async def check_active_games(bot):
 
     # Para evitar anunciar dos veces la misma partida si hay varios MSI en la misma
     partidas_ya_checadas = set()
+    
+    
+        # --- INICIO SISTEMA RETRY ---
+    retry_queue = load_retry_queue()
+    retry_puuids = set(r["puuid"] for r in retry_queue)
+    new_retry_queue = []
+    # --- FIN SISTEMA RETRY ---
+    
+    
+    
 
     for guild_id_str, channel_id in channel_ids.items():
         channel = bot.get_channel(channel_id)
@@ -40,21 +66,36 @@ async def check_active_games(bot):
 
         print(f"🔎 Comprobando partidas activas de MSI_PLAYERS para guild {guild_id_str}...")
 
-        for player in MSI_PLAYERS:
+        # --- INICIO: prioriza los de retry ---
+        players_to_check = [p for p in MSI_PLAYERS if p.get("puuid") in retry_puuids] + \
+                           [p for p in MSI_PLAYERS if p.get("puuid") not in retry_puuids]
+        # --- FIN: prioriza los de retry ---
+
+        for player in players_to_check:
             puuid = player.get("puuid")
             print(f"   → Revisando jugador: {player['name']} ({player['riot_id']['game_name']}#{player['riot_id']['tag_line']}) | PUUID: {puuid}")
             if not puuid:
                 print(f"❌ No se encontró puuid para {player['name']}")
                 continue
 
-            if not await is_valid_puuid(puuid):
-                print(f"❌ PUUID inválido para {player['name']} ({player['riot_id']['game_name']}#{player['riot_id']['tag_line']}): {puuid}")
-                continue
-            
-            
-            active_game = await get_active_game(puuid)
-            if not active_game:
-                print(f"   → {player['name']} NO está en partida activa.")
+            # Quita la llamada directa a is_valid_puuid aquí
+
+            active_game, status = await get_active_game(puuid)
+            if active_game is None:
+                if status == 404:
+                    if not await is_valid_puuid(puuid):
+                        print(f"❌ PUUID inválido para {player['name']} ({player['riot_id']['game_name']}#{player['riot_id']['tag_line']}): {puuid}")
+                    else:
+                        print(f"   → {player['name']} NO está en partida activa.")
+                elif status == 429:
+                    print(f"⚠️ Rate limit (429) para {player['name']}, agregando a retry_queue")
+                    new_retry_queue.append({
+                        "puuid": puuid,
+                        "game_name": player["riot_id"]["game_name"],
+                        "tag_line": player["riot_id"]["tag_line"]
+                    })
+                else:
+                    print(f"⚠️ Error al consultar partida activa para {player['name']} (status={status})")
                 continue
             
             # FILTRO: Solo partidas relevantes
@@ -110,3 +151,5 @@ async def check_active_games(bot):
                 )
             else:
                 await channel.send(embed=embed)
+
+    save_retry_queue(new_retry_queue)                 
