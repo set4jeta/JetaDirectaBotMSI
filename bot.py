@@ -1,14 +1,37 @@
 # bot.py
 import nextcord
+import datetime 
 from nextcord.ext import commands, tasks
 from config import DISCORD_TOKEN
 from tracking.tracker import check_active_games, save_channel_id
 from tracking.accounts import MSI_PLAYERS
-from riot.riot_api import get_ranked_data, get_active_game
+from riot.riot_api import get_ranked_data, get_active_game, get_match_ids_by_puuid, get_match_by_id
 from ui.embeds import create_match_embed
 import time
 import asyncio
 import subprocess
+import json
+import os
+
+HISTORIAL_CACHE_PATH = os.path.join("tracking", "historial_cache.json")
+
+def load_historial_cache():
+    if os.path.exists(HISTORIAL_CACHE_PATH):
+        with open(HISTORIAL_CACHE_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+def save_historial_cache(cache):
+    with open(HISTORIAL_CACHE_PATH, "w", encoding="utf-8") as f:
+        json.dump(cache, f, ensure_ascii=False, indent=2)
+
+
+
+
+
+
+
+
 
 
 RANKED_CACHE = {}  # clave: puuid, valor: (timestamp, ranked_data)
@@ -107,20 +130,27 @@ def add_player_commands(bot):
             if not puuid:
                 await ctx.send(f"No hay PUUID para {display_name}.")
                 return
-            active_game, status = await get_active_game(puuid)
-            if not active_game:
-                await ctx.send(f"❌ {display_name} no está en ninguna partida activa.")
-                return
-            embed, bat_path = await create_match_embed(active_game)
-            embed.title = f"Partida de {display_name}! 🎮"
-            if bat_path:
-                await ctx.send(
-                    content=f"⬇️ Archivo para espectar la partida de {display_name}:",
-                    embed=embed,
-                    file=nextcord.File(bat_path, filename="spectate_lol.bat")
-                )
-            else:
-                await ctx.send(embed=embed)
+
+            max_retries = 2
+            delay = 1  # segundos entre intentos
+
+            for intento in range(max_retries):
+                active_game, status = await get_active_game(puuid)
+                if active_game:
+                    embed, bat_path = await create_match_embed(active_game)
+                    embed.title = f"Partida de {display_name}! 🎮"
+                    if bat_path:
+                        await ctx.send(
+                            content=f"⬇️ Archivo para espectar la partida de {display_name}:",
+                            embed=embed,
+                            file=nextcord.File(bat_path, filename="spectate_lol.bat")
+                        )
+                    else:
+                        await ctx.send(embed=embed)
+                    return
+                if intento < max_retries - 1:
+                    await asyncio.sleep(delay)
+            await ctx.send(f"❌ {display_name} no está en ninguna partida activa.")
         return player_cmd
 
     for player in MSI_PLAYERS:
@@ -186,3 +216,90 @@ async def setchannel(ctx):
     from tracking.tracker import save_channel_id
     save_channel_id(guild_id, channel_id)
     await ctx.send(f"✅ Canal de notificaciones configurado para este servidor: {ctx.channel.mention}")
+    
+    
+    
+    
+@bot.command()
+async def historial(ctx, *, nombre: str):
+    import time
+    nombre = nombre.strip().lower()
+    player = next((p for p in MSI_PLAYERS if p["name"].lower() == nombre), None)
+    if not player:
+        await ctx.send(f"No se encontró el jugador '{nombre}'.")
+        return
+    puuid = player.get("puuid")
+    if not puuid:
+        await ctx.send(f"No hay PUUID para {player['name']}.")
+        return
+
+    cache = load_historial_cache()
+    now = int(time.time())
+    cache_entry = cache.get(puuid)
+    # Si hay caché y no han pasado 15h, úsalo
+    HISTORIAL_HORAS = 15
+    
+    if cache_entry and now - cache_entry["timestamp"] < HISTORIAL_HORAS * 3600:
+        partidas = cache_entry["partidas"]
+    else:
+        match_ids = []  # <-- ¡Esta línea debe estar aquí!
+        for queue_id in [420, 440]:
+            ids = await get_match_ids_by_puuid(puuid, now - HISTORIAL_HORAS * 3600, now, queue=queue_id, count=20)
+            match_ids.extend(ids)
+        match_ids = list(dict.fromkeys(match_ids))
+        print(f"[DEBUG] match_ids obtenidos para {player['name']}: {match_ids}")
+        print(f"[DEBUG] Total match_ids: {len(match_ids)}")
+        partidas = []
+        POS_EMOJI = {
+            "TOP": "🗻",
+            "JUNGLE": "🌲",
+            "MID": "✨",
+            "ADC": "🏹",
+            "BOTTOM": "🏹",
+            "SUPPORT": "🛡️",
+        }
+        for match_id in match_ids:
+            match = await get_match_by_id(match_id)
+            if not match or "info" not in match:
+                continue
+            info = match["info"]
+            duration = info.get("gameDuration", 0)
+            mins = duration // 60
+            part = next((p for p in info["participants"] if p["puuid"] == puuid), None)
+            if not part:
+                continue
+            champ = part.get("championName", "???")
+            kills = part.get("kills", 0)
+            deaths = part.get("deaths", 0)
+            assists = part.get("assists", 0)
+            pos = part.get("teamPosition", "")
+            if pos.upper() == "UTILITY":
+                pos = "SUPPORT"
+            pos_str = f" ({pos.title()})" if pos else ""
+            emoji = POS_EMOJI.get(pos.upper(), "") if pos else ""
+            start_ts = info.get("gameStartTimestamp")
+            if isinstance(start_ts, int):
+                dt = datetime.datetime.fromtimestamp(start_ts / 1000)
+                hora_inicio_str = dt.strftime("%H:%M %d-%m-%Y")
+            else:
+                hora_inicio_str = "¿?"
+            
+            
+            
+            partidas.append(f"**{champ}**{pos_str} {emoji} | {kills}/{deaths}/{assists} | {mins} min | 🕒 {hora_inicio_str}")
+        # Guarda en caché
+        cache[puuid] = {"timestamp": now, "partidas": partidas}
+        save_historial_cache(cache)
+
+    if not partidas:
+        await ctx.send(f"No se pudieron obtener los detalles de las partidas recientes de {player['name']}.")
+        return
+
+    riot_id = player.get("riot_id", {})
+    game_name = riot_id.get("game_name", "")
+    tag_line = riot_id.get("tag_line", "")
+    nick_str = f"{player['name']} ({game_name}#{tag_line})" if game_name and tag_line else player['name']
+    msg = f"**{nick_str}** últimas partidas 15h:\n\n"
+    for i, linea in enumerate(partidas, 1):
+        msg += f"{i}. {linea}\n"
+    await ctx.send(msg)  

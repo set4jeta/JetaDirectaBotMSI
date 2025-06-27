@@ -86,6 +86,23 @@
   },
   {
     "riot_id": {
+      "game_name": "Bb trickz",
+      "tag_line": "Tipz"
+    },
+    "team": "MKOI",
+    "name": "Myrwn",
+    "rank": {
+      "rank": "I",
+      "tier": "MASTER",
+      "leaguePoints": 172,
+      "wins": 26,
+      "losses": 2,
+      "platform": "NA1"
+    },
+    "puuid": "P713bIwFM7kT7HYfdjU4a62PlKx_Vps8iL03efHUsMXR43EGaWabUPfEFFrS6Xx6Mf6GBSe4qv-h_w"
+  },
+  {
+    "riot_id": {
       "game_name": "KOIIIIIIIII",
       "tag_line": "1234"
     },
@@ -103,23 +120,6 @@
   },
   {
     "riot_id": {
-      "game_name": "Bb trickz",
-      "tag_line": "Tipz"
-    },
-    "team": "MKOI",
-    "name": "Myrwn",
-    "rank": {
-      "rank": "I",
-      "tier": "MASTER",
-      "leaguePoints": 126,
-      "wins": 24,
-      "losses": 2,
-      "platform": "NA1"
-    },
-    "puuid": "P713bIwFM7kT7HYfdjU4a62PlKx_Vps8iL03efHUsMXR43EGaWabUPfEFFrS6Xx6Mf6GBSe4qv-h_w"
-  },
-  {
-    "riot_id": {
       "game_name": "Dani Flow",
       "tag_line": "myrwn"
     },
@@ -128,46 +128,12 @@
     "rank": {
       "rank": "I",
       "tier": "MASTER",
-      "leaguePoints": 56,
-      "wins": 21,
+      "leaguePoints": 97,
+      "wins": 23,
       "losses": 2,
       "platform": "NA1"
     },
     "puuid": "xUeEgVrSHneQHox2Q1DObujfK602NkYulWMEEskSA7DKrFOPSgYktE1mGRGtnXvXSTOFBOaowloROg"
-  },
-  {
-    "riot_id": {
-      "game_name": "xin chao",
-      "tag_line": "1507"
-    },
-    "team": "GAM",
-    "name": "Emo",
-    "rank": {
-      "rank": "I",
-      "tier": "DIAMOND",
-      "leaguePoints": 86,
-      "wins": 18,
-      "losses": 3,
-      "platform": "NA1"
-    },
-    "puuid": "SHYTuePdB6_3MVSbvgzRJLafb6mliyEYd5xUU-ZPc6wjFnl6GP8hqmhQOoyDSxgGqQnpeJpGF1kyDA"
-  },
-  {
-    "riot_id": {
-      "game_name": "underdogs",
-      "tag_line": "VNLCP"
-    },
-    "team": "GAM",
-    "name": "Levi",
-    "rank": {
-      "rank": "I",
-      "tier": "DIAMOND",
-      "leaguePoints": 63,
-      "wins": 17,
-      "losses": 3,
-      "platform": "NA1"
-    },
-    "puuid": "596k8QreRjmplo0n8ZSrg5rwk2m-lYTpC68trETn184bRAO8qsPOM6u0WV0XoZcB2GEU6X8fQn9HZw"
   },
   {
     "riot_id": {
@@ -179,12 +145,46 @@
     "rank": {
       "rank": "I",
       "tier": "DIAMOND",
-      "leaguePoints": 33,
-      "wins": 17,
+      "leaguePoints": 85,
+      "wins": 19,
       "losses": 5,
       "platform": "NA1"
     },
     "puuid": "qUhjUx3-vB76alRU5f98GRVTUUSCAEY9qljhhgSl7omVD29Cc_F8gw9aFAnDILPqHhJVPCfKGEoODA"
+  },
+  {
+    "riot_id": {
+      "game_name": "underdogs",
+      "tag_line": "VNLCP"
+    },
+    "team": "GAM",
+    "name": "Levi",
+    "rank": {
+      "rank": "I",
+      "tier": "DIAMOND",
+      "leaguePoints": 76,
+      "wins": 18,
+      "losses": 4,
+      "platform": "NA1"
+    },
+    "puuid": "596k8QreRjmplo0n8ZSrg5rwk2m-lYTpC68trETn184bRAO8qsPOM6u0WV0XoZcB2GEU6X8fQn9HZw"
+  },
+  {
+    "riot_id": {
+      "game_name": "xin chao",
+      "tag_line": "1507"
+    },
+    "team": "GAM",
+    "name": "Emo",
+    "rank": {
+      "rank": "I",
+      "tier": "DIAMOND",
+      "leaguePoints": 72,
+      "wins": 18,
+      "losses": 4,
+      "platform": "NA1"
+    },
+    "puuid": "SHYTuePdB6_3MVSbvgzRJLafb6mliyEYd5xUU-ZPc6wjFnl6GP8hqmhQOoyDSxgGqQnpeJpGF1kyDA"
   },
   {
     "riot_id": {
@@ -196,8 +196,8 @@
     "rank": {
       "rank": "I",
       "tier": "DIAMOND",
-      "leaguePoints": 21,
-      "wins": 16,
+      "leaguePoints": 49,
+      "wins": 17,
       "losses": 4,
       "platform": "NA1"
     },
@@ -213,29 +213,12 @@
     "rank": {
       "rank": "II",
       "tier": "DIAMOND",
-      "leaguePoints": 57,
-      "wins": 13,
+      "leaguePoints": 87,
+      "wins": 14,
       "losses": 2,
       "platform": "NA1"
     },
     "puuid": "7TCqAOiQSV35BYN0ZqsT3jp0rKHczzmqxT7_2iWuLn_mZJPsOFW4fJP8C-5uQkV0EanoGHi7gCkAIA"
-  },
-  {
-    "riot_id": {
-      "game_name": "thieuemtuisobovo",
-      "tag_line": "sang1"
-    },
-    "team": "GAM",
-    "name": "Kiaya",
-    "rank": {
-      "rank": "II",
-      "tier": "DIAMOND",
-      "leaguePoints": 35,
-      "wins": 15,
-      "losses": 8,
-      "platform": "NA1"
-    },
-    "puuid": "r42_z2yuiWtBo75MEGZeQdT8e_-L-J1sHtOOlR0n2bJMwubrR1HzzjlEWQ42iFQSqVwza04fBp5VEg"
   },
   {
     "riot_id": {
@@ -247,12 +230,63 @@
     "rank": {
       "rank": "II",
       "tier": "DIAMOND",
-      "leaguePoints": 19,
-      "wins": 13,
+      "leaguePoints": 79,
+      "wins": 15,
       "losses": 5,
       "platform": "NA1"
     },
     "puuid": "oUTItjsox6pBDm08H-EtvOncbFgXgm8cgaiwNY6XnXCX6qzMRV4iyMTxdyPMFkZikvGqU-ZZOBQBtA"
+  },
+  {
+    "riot_id": {
+      "game_name": "thieuemtuisobovo",
+      "tag_line": "sang1"
+    },
+    "team": "GAM",
+    "name": "Kiaya",
+    "rank": {
+      "rank": "II",
+      "tier": "DIAMOND",
+      "leaguePoints": 63,
+      "wins": 16,
+      "losses": 8,
+      "platform": "NA1"
+    },
+    "puuid": "r42_z2yuiWtBo75MEGZeQdT8e_-L-J1sHtOOlR0n2bJMwubrR1HzzjlEWQ42iFQSqVwza04fBp5VEg"
+  },
+  {
+    "riot_id": {
+      "game_name": "paraworld",
+      "tag_line": "369"
+    },
+    "team": "BLG",
+    "name": "Knight",
+    "rank": {
+      "rank": "II",
+      "tier": "DIAMOND",
+      "leaguePoints": 37,
+      "wins": 16,
+      "losses": 3,
+      "platform": "NA1"
+    },
+    "puuid": "SJnbeC_rynYOpKvUDbofTopQUXi9O8mGAltweE-sL4CO5SUkKLxPh-h8lj9gHpCG69xQR7MOfhkRqA"
+  },
+  {
+    "riot_id": {
+      "game_name": "quyhyvongchamcom",
+      "tag_line": "GAM"
+    },
+    "team": "GAM",
+    "name": "Easylove",
+    "rank": {
+      "rank": "II",
+      "tier": "DIAMOND",
+      "leaguePoints": 30,
+      "wins": 16,
+      "losses": 10,
+      "platform": "NA1"
+    },
+    "puuid": "SEHU4n3t038c23bOxn_3LD9Kh7X8G7TuCtUFUNwA1WT2E9wyVQRPCIR9BISGlxxmDw_RfXBLI8jdPA"
   },
   {
     "riot_id": {
@@ -273,23 +307,6 @@
   },
   {
     "riot_id": {
-      "game_name": "quyhyvongchamcom",
-      "tag_line": "GAM"
-    },
-    "team": "GAM",
-    "name": "Easylove",
-    "rank": {
-      "rank": "II",
-      "tier": "DIAMOND",
-      "leaguePoints": 4,
-      "wins": 15,
-      "losses": 10,
-      "platform": "NA1"
-    },
-    "puuid": "SEHU4n3t038c23bOxn_3LD9Kh7X8G7TuCtUFUNwA1WT2E9wyVQRPCIR9BISGlxxmDw_RfXBLI8jdPA"
-  },
-  {
-    "riot_id": {
       "game_name": "FURIA Ronaldo",
       "tag_line": "BAHIA"
     },
@@ -304,23 +321,6 @@
       "platform": "NA1"
     },
     "puuid": "fl9MznQ4t2pBcDOnRdBqlYlp1gcDwCE_DCJiaCeurJUz2MJ1RQT33nWLDPLyhSBI4qXwfT79XRlVFw"
-  },
-  {
-    "riot_id": {
-      "game_name": "paraworld",
-      "tag_line": "369"
-    },
-    "team": "BLG",
-    "name": "Knight",
-    "rank": {
-      "rank": "IV",
-      "tier": "DIAMOND",
-      "leaguePoints": 97,
-      "wins": 11,
-      "losses": 2,
-      "platform": "NA1"
-    },
-    "puuid": "SJnbeC_rynYOpKvUDbofTopQUXi9O8mGAltweE-sL4CO5SUkKLxPh-h8lj9gHpCG69xQR7MOfhkRqA"
   },
   {
     "riot_id": {
@@ -358,23 +358,6 @@
   },
   {
     "riot_id": {
-      "game_name": "ONE Steal",
-      "tag_line": "vitin"
-    },
-    "team": "FUR",
-    "name": "Guigo",
-    "rank": {
-      "rank": "IV",
-      "tier": "DIAMOND",
-      "leaguePoints": 35,
-      "wins": 10,
-      "losses": 5,
-      "platform": "NA1"
-    },
-    "puuid": "x-EFGduQDGcTmZZKw87Sgk26drXeC8IjS_1kGMcp5LujbVpwE7fGv8RYqtX8Y4XW7Xwal4ZKxlSeuQ"
-  },
-  {
-    "riot_id": {
       "game_name": "FLY Bwipo",
       "tag_line": "1810"
     },
@@ -389,6 +372,40 @@
       "platform": "NA1"
     },
     "puuid": "OR8v6lFfSuSk7St8qSk6u4rb8xbRZekbSSLW7Vc0IYorCA-jJYLmaHYk1urXC9wOfeKis3gJMfK_Bg"
+  },
+  {
+    "riot_id": {
+      "game_name": "ONE Steal",
+      "tag_line": "vitin"
+    },
+    "team": "FUR",
+    "name": "Guigo",
+    "rank": {
+      "rank": "IV",
+      "tier": "DIAMOND",
+      "leaguePoints": 25,
+      "wins": 10,
+      "losses": 6,
+      "platform": "NA1"
+    },
+    "puuid": "x-EFGduQDGcTmZZKw87Sgk26drXeC8IjS_1kGMcp5LujbVpwE7fGv8RYqtX8Y4XW7Xwal4ZKxlSeuQ"
+  },
+  {
+    "riot_id": {
+      "game_name": "zxcvbnmmnbvcx",
+      "tag_line": "99999"
+    },
+    "team": "GAM",
+    "name": "Artemis",
+    "rank": {
+      "rank": "IV",
+      "tier": "DIAMOND",
+      "leaguePoints": 16,
+      "wins": 9,
+      "losses": 4,
+      "platform": "NA1"
+    },
+    "puuid": "RhjfYMzzn7TtkQ3qzcq821Z472BMOeWsUNm2bmAhYdi3OzoMCtROS6Lm3PFgAGf4wFpWANtj-m8e6w"
   },
   {
     "riot_id": {
@@ -409,23 +426,6 @@
   },
   {
     "riot_id": {
-      "game_name": "zxcvbnmmnbvcx",
-      "tag_line": "99999"
-    },
-    "team": "GAM",
-    "name": "Artemis",
-    "rank": {
-      "rank": "I",
-      "tier": "EMERALD",
-      "leaguePoints": 86,
-      "wins": 8,
-      "losses": 4,
-      "platform": "NA1"
-    },
-    "puuid": "RhjfYMzzn7TtkQ3qzcq821Z472BMOeWsUNm2bmAhYdi3OzoMCtROS6Lm3PFgAGf4wFpWANtj-m8e6w"
-  },
-  {
-    "riot_id": {
       "game_name": "G2 BrokenBlade",
       "tag_line": "1819"
     },
@@ -434,9 +434,9 @@
     "rank": {
       "rank": "I",
       "tier": "EMERALD",
-      "leaguePoints": 65,
+      "leaguePoints": 55,
       "wins": 7,
-      "losses": 3,
+      "losses": 4,
       "platform": "NA1"
     },
     "puuid": "t2xhyDsUODcv99sjM5S0H0ZNda-dEBpHzTUK73RrAgZB9MkdltTdU2KT30z-Au8gNJ5AAY-k6O7RBw"
@@ -477,6 +477,23 @@
   },
   {
     "riot_id": {
+      "game_name": "Bin",
+      "tag_line": "K620"
+    },
+    "team": "BLG",
+    "name": "Bin",
+    "rank": {
+      "rank": "I",
+      "tier": "EMERALD",
+      "leaguePoints": 17,
+      "wins": 5,
+      "losses": 2,
+      "platform": "NA1"
+    },
+    "puuid": "RrJnGtKvGLjgpBUJ2tIutlcUi2FaBEFn3lzBzJWpqDKXN_J40bxunuUmBnNtEum8rXDB2P_fAFZjXQ"
+  },
+  {
+    "riot_id": {
       "game_name": "G2 Caps",
       "tag_line": "LOL1"
     },
@@ -500,31 +517,14 @@
     "team": "G2",
     "name": "SkewMond",
     "rank": {
-      "rank": "I",
+      "rank": "II",
       "tier": "EMERALD",
-      "leaguePoints": 7,
+      "leaguePoints": 97,
       "wins": 5,
-      "losses": 3,
+      "losses": 4,
       "platform": "NA1"
     },
     "puuid": "2aaaDLujxbnFsZCWO6gRds1AW9w5WnSHFn8AcrzBC6f3kW9i25qo9fA8gBt2tv5cnPLnGKPYaikqKw"
-  },
-  {
-    "riot_id": {
-      "game_name": "Bin",
-      "tag_line": "K620"
-    },
-    "team": "BLG",
-    "name": "Bin",
-    "rank": {
-      "rank": "II",
-      "tier": "EMERALD",
-      "leaguePoints": 87,
-      "wins": 4,
-      "losses": 2,
-      "platform": "NA1"
-    },
-    "puuid": "RrJnGtKvGLjgpBUJ2tIutlcUi2FaBEFn3lzBzJWpqDKXN_J40bxunuUmBnNtEum8rXDB2P_fAFZjXQ"
   },
   {
     "riot_id": {

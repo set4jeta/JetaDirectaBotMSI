@@ -142,7 +142,7 @@ async def check_active_games(bot):
             announced_games.add(game_id)
             print(f"   ✅ Anunciando partida {game_id} con MSI: {msi_puuids}")
 
-            embed, bat_path = await create_match_embed(active_game)
+            embed, bat_path = await create_match_embed(active_game, mostrar_tiempo=False, mostrar_hora=True)
             if bat_path:
                 await channel.send(
                     content="⬇️ **Archivo para espectar la partida:**\nAdjunto encontrarás el archivo `spectate_lol.bat` personalizado para esta partida. Descárgalo y ejecútalo para espectar desde tu cliente de LoL.",

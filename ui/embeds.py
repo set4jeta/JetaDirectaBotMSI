@@ -1,5 +1,6 @@
 from typing import Tuple, Optional
 import nextcord
+import datetime
 import pprint
 from riot.riot_api import get_champion_name_by_id, get_ranked_data
 from tracking.accounts import MSI_PLAYERS
@@ -78,8 +79,8 @@ CHAMPION_TO_ROLES = {
     "Bard": ["SUPPORT"],
     "Bel'Veth": ["JUNGLE"],
     "Blitzcrank": ["SUPPORT"],
-    "Brand": ["MID"],
-    "Braum": ["SUPPORT"],
+    "Brand": ["MID", "SUPPORT", "JUNGLE"],
+    "Braum": ["SUPPORT", "TOP"],
     "Briar": ["JUNGLE", "TOP"],
     "Caitlyn": ["ADC"],
     "Camille": ["TOP"],
@@ -94,14 +95,14 @@ CHAMPION_TO_ROLES = {
     "Elise": ["JUNGLE"],
     "Evelynn": ["JUNGLE"],
     "Ezreal": ["ADC"],
-    "Fiddlesticks": ["JUNGLE", "MID"],
+    "Fiddlesticks": ["JUNGLE", "SUPPORT", "MID"],
     "Fiora": ["TOP"],
     "Fizz": ["MID", "TOP"],
     "Galio": ["MID", "SUPPORT", "TOP"],
     "Gangplank": ["TOP", "MID"],
     "Garen": ["TOP"],
     "Gnar": ["TOP"],
-    "Gragas": ["JUNGLE", "MID"],
+    "Gragas": ["TOP", "JUNGLE", "MID"], 
     "Graves": ["JUNGLE"],
     "Gwen": ["TOP"],
     "Hecarim": ["JUNGLE"],
@@ -118,8 +119,8 @@ CHAMPION_TO_ROLES = {
     "Jinx": ["ADC"],
     "Kai'Sa": ["ADC"],
     "Kalista": ["ADC"],
-    "Karma": ["MID", "SUPPORT"],
-    "Karthus": ["MID", "JUNGLE"],
+    "Karma": [ "SUPPORT","TOP", "MID" ],
+    "Karthus": ["JUNGLE", "MID"],
     "Kassadin": ["MID"],
     "Katarina": ["MID"],
     "Kayle": ["TOP", "MID"],
@@ -140,7 +141,7 @@ CHAMPION_TO_ROLES = {
     "Lux": ["MID", "SUPPORT"],
     "Malphite": ["TOP", "JUNGLE"],
     "Malzahar": ["MID"],
-    "Maokai": ["TOP", "JUNGLE"],
+    "Maokai": [ "JUNGLE", "TOP", "SUPPORT" ],
     "Master Yi": ["JUNGLE"],
     "Mel": ["MID", "SUPPORT"],  # champion #170, pero posterior a Ambessa :contentReference[oaicite:1]{index=1}
     "Milio": ["SUPPORT"],
@@ -151,15 +152,15 @@ CHAMPION_TO_ROLES = {
     "Nami": ["SUPPORT"],
     "Nasus": ["TOP"],
     "Nautilus": ["SUPPORT", "TOP"],
-    "Neeko": ["MID", "SUPPORT"],
+    "Neeko": [ "SUPPORT", "TOP", "MID" ],
     "Nilah": ["ADC"],
     "Nocturne": ["JUNGLE"],
     "Nunu & Willump": ["JUNGLE", "MID", "SUPPORT"],
     "Olaf": ["JUNGLE", "TOP"],
     "Orianna": ["MID"],
     "Ornn": ["TOP"],
-    "Pantheon": ["TOP", "JUNGLE"],
-    "Poppy": ["TOP", "JUNGLE"],
+    "Pantheon": ["JUNGLE", "TOP", "MID"],
+    "Poppy": ["TOP", "JUNGLE", "SUPPORT"],
     "Pyke": ["SUPPORT", "JUNGLE"],
     "Qiyana": ["MID"],
     "Quinn": ["TOP"],
@@ -167,14 +168,14 @@ CHAMPION_TO_ROLES = {
     "Rammus": ["JUNGLE"],
     "Renekton": ["TOP"],
     "Rell": ["SUPPORT", "TOP"],
-    "Rengar": ["JUNGLE"],
+    "Rengar": ["JUNGLE", "ADC"],
     "Riven": ["TOP"],
-    "Rumble": ["TOP", "MID"],
-    "Ryze": ["MID"],
+    "Rumble": ["TOP", "JUNGLE", "MID"],
+    "Ryze": ["MID" , "TOP"],
     "Samira": ["ADC"],
     "Sejuani": ["JUNGLE"],
     "Senna": ["SUPPORT", "ADC"],
-    "Seraphine": ["SUPPORT", "MID"],
+    "Seraphine": ["SUPPORT", "ADC", "MID"],
     "Sett": ["TOP", "JUNGLE"],
     "Shaco": ["JUNGLE"],
     "Shen": ["TOP", "SUPPORT"],
@@ -186,7 +187,7 @@ CHAMPION_TO_ROLES = {
     "Smolder": ["ADC", "MID"],
     "Sona": ["SUPPORT"],
     "Soraka": ["SUPPORT"],
-    "Swain": ["MID", "TOP"],
+    "Swain": ["SUPPORT", "MID", "TOP"],
     "Sylas": ["MID", "JUNGLE"],
     "Syndra": ["MID"],
     "Tahm Kench": ["SUPPORT", "TOP"],
@@ -195,7 +196,7 @@ CHAMPION_TO_ROLES = {
     "Taric": ["SUPPORT", "TOP"],
     "Teemo": ["TOP", "JUNGLE", "MID"],
     "Thresh": ["SUPPORT"],
-    "Tristana": ["ADC"],
+    "Tristana": ["ADC", "MID"],
     "Trundle": ["TOP", "JUNGLE"],
     "Tryndamere": ["TOP"],
     "Twisted Fate": ["MID", "JUNGLE"],
@@ -203,7 +204,7 @@ CHAMPION_TO_ROLES = {
     "Udyr": ["JUNGLE"],
     "Urgot": ["TOP"],
     "Varus": ["ADC"],
-    "Vayne": ["ADC"],
+    "Vayne": ["ADC", "TOP"],
     "Veigar": ["MID", "SUPPORT"],
     "Vex": ["MID", "SUPPORT"],
     "Vi": ["JUNGLE", "TOP"],
@@ -216,8 +217,8 @@ CHAMPION_TO_ROLES = {
     "Xayah": ["ADC"],
     "Xerath": ["MID"],
     "Xin Zhao": ["JUNGLE"],
-    "Yasuo": ["MID", "TOP"],
-    "Yone": ["MID", "TOP"],
+    "Yasuo": ["MID", "TOP", "ADC"],
+    "Yone": ["MID", "TOP", "ADC"],
     "Yuumi": ["SUPPORT"],
     "Zed": ["MID", "TOP"],
     "Zeri": ["ADC"],
@@ -301,7 +302,7 @@ async def ordenar_equipo_por_rol(participants, team_id):
 
 
 
-async def create_match_embed(active_game: dict) -> tuple[nextcord.Embed, Optional[str]]:
+async def create_match_embed(active_game: dict, mostrar_tiempo: bool = True, mostrar_hora: bool = True) -> tuple[nextcord.Embed, Optional[str]]:
     participants = active_game["participants"]
     print("=== PARTICIPANTS DEBUG ===")
     for p in participants:
@@ -342,9 +343,35 @@ async def create_match_embed(active_game: dict) -> tuple[nextcord.Embed, Optiona
     else:
         queue_name = "Desconocida (None)"
     game_mode = active_game.get("gameMode", "Desconocido")
+    game_start_time = active_game.get("gameStartTime")
+    game_length = active_game.get("gameLength")
+
+    # Formatea el tiempo transcurrido
+    if isinstance(game_length, int):
+        mins, secs = divmod(game_length, 60)
+        tiempo_str = f"{mins}m {secs}s"
+    else:
+        tiempo_str = "Desconocido"
+
+    # Formatea la hora de inicio
+    if isinstance(game_start_time, int):
+        # Convierte de ms a segundos y a hora local
+        dt = datetime.datetime.fromtimestamp(game_start_time / 1000)
+        hora_inicio_str = dt.strftime("%H:%M:%S")
+        fecha_inicio_str = dt.strftime("%Y-%m-%d %H:%M:%S")
+    else:
+        hora_inicio_str = "Desconocida"
+        fecha_inicio_str = "Desconocida"
+
+    desc = f"**Cola:** {queue_name}\n**Modo:** {game_mode}"
+    if mostrar_tiempo:
+        desc += f"\n**Tiempo transcurrido:** {tiempo_str}"
+    if mostrar_hora:
+        desc += f"\n**Hora de inicio:** {fecha_inicio_str}"
+
     embed = nextcord.Embed(
         title=title,
-        description=f"**Cola:** {queue_name}\n**Modo:** {game_mode}",
+        description=desc,
         color=nextcord.Color.red()
     )
 
@@ -409,6 +436,17 @@ async def create_match_embed(active_game: dict) -> tuple[nextcord.Embed, Optiona
         embed.add_field(
             name="🔗 Espectar en directo",
             value="Descarga y ejecuta el archivo **spectate_lol.bat** adjunto arriba para espectar la partida desde tu cliente. (Debes tener el cliente de LoL cerrado)",
+            inline=False
+        )
+        embed.add_field(
+            name="⚠️ Advertencia importante",
+            value=(
+                    "Al ejecutar el archivo **spectate_lol.bat**, se reiniciará Riot Vanguard (anticheat). "
+                    "Para volver a jugar partidas normales de LoL o Valorant, "
+                    "**reinicia tu PC antes de abrir el cliente**.\n\n"
+                    "Si solo quieres espectar, no hay problema."
+                    "(OJO, sólo sirve para partidas que estén en vivo, partida terminada sólo mostrará el minuto final)" 
+            ),
             inline=False
         )
     else:

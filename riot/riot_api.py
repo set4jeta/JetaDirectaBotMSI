@@ -74,3 +74,30 @@ async def is_valid_puuid(puuid: str) -> bool:
             return resp.status == 200
 
 
+async def get_match_ids_by_puuid(puuid: str, start_time: int, end_time: int, queue: int = None, count: int = 10) -> list[str]: # type: ignore
+    """
+    Devuelve una lista de match IDs para el puuid entre start_time y end_time (epoch segundos).
+    """
+    params = {
+        "startTime": start_time,
+        "endTime": end_time,
+        "count": count
+    }
+    if queue:
+        params["queue"] = queue
+    url = f"https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=HEADERS, params=params) as resp: # type: ignore
+            if resp.status == 200:
+                return await resp.json()
+            return []
+
+
+
+async def get_match_by_id(match_id: str) -> dict | None:
+    url = f"https://americas.api.riotgames.com/lol/match/v5/matches/{match_id}"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=HEADERS) as resp: # type: ignore
+            if resp.status == 200:
+                return await resp.json()
+            return None

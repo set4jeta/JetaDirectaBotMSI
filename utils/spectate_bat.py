@@ -21,7 +21,7 @@ set "LOL_PATH=C:\\Riot Games\\League of Legends"
 set "GAME_DIR=%LOL_PATH%\\Game"
 set "EXE_PATH=%GAME_DIR%\\League of Legends.exe"
 
-:: 4. Comando de espectador (ASÍ lo hace OP.GG)
+:: 4. Comando de espectador 
 echo Iniciando modo espectador...
 cd /d "%GAME_DIR%"
 start "" "%EXE_PATH%" "spectator %SERVER% %KEY% %MATCH_ID% %REGION%" "-UseRads" "-GameBaseDir=.."
