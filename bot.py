@@ -6,7 +6,7 @@ from config import DISCORD_TOKEN
 from tracking.tracker import check_active_games, save_channel_id
 from tracking.active_game_cache import get_active_game_cache
 from tracking.accounts import MSI_PLAYERS
-from riot.riot_api import get_ranked_data, get_active_game, get_match_ids_by_puuid, get_match_by_id, is_live_from_dpm
+from riot.riot_api import get_ranked_data, get_active_game, get_match_ids_by_puuid, get_match_by_id
 from ui.embeds import create_match_embed
 import time
 import asyncio
@@ -28,7 +28,37 @@ def save_historial_cache(cache):
         json.dump(cache, f, ensure_ascii=False, indent=2)
 
 
+RETRY_PUUIDS = []
+RETRY_WORKER_RUNNING = False
 
+def add_to_retry_queue(puuid):
+    if puuid not in RETRY_PUUIDS:
+        RETRY_PUUIDS.append(puuid)
+        # Si el worker no está corriendo, lánzalo
+        if not RETRY_WORKER_RUNNING:
+            asyncio.create_task(retry_worker())
+
+async def retry_worker():
+    global RETRY_WORKER_RUNNING
+    RETRY_WORKER_RUNNING = True
+    while RETRY_PUUIDS:
+        puuid = RETRY_PUUIDS[0]
+        while True:
+            active_game, status = await get_active_game(puuid)
+            if status == 200 and active_game:
+                from tracking.active_game_cache import set_active_game
+                set_active_game(puuid, active_game)
+                break  # Sale del bucle interno, pasa al siguiente puuid
+            elif status == 404:
+                from tracking.active_game_cache import ACTIVE_GAME_CACHE
+                if puuid in ACTIVE_GAME_CACHE:
+                    del ACTIVE_GAME_CACHE[puuid]
+                break  # Sale del bucle interno, pasa al siguiente puuid
+            elif status != 429:
+                break  # Sale del bucle interno, pasa al siguiente puuid
+            await asyncio.sleep(2)  # Espera 2 segundos antes de reintentar si sigue en 429
+        RETRY_PUUIDS.pop(0)
+    RETRY_WORKER_RUNNING = False
 
 
 
@@ -150,43 +180,46 @@ def add_player_commands(bot):
                     else:
                         await ctx.send(embed=embed)
                     return
+                if status == 404:
+                    await ctx.send(f"❌ {display_name} no está en ninguna partida activa.")
+                    return
                 if status == 429:
-                    # Intenta usar el caché de la última partida anunciada
+    # Usa el caché de la última partida anunciada si existe
                     cache_entry = get_active_game_cache(puuid)
                     if cache_entry:
-                        # Verifica si sigue en partida usando dpm.lol
-                        sigue_en_partida = await is_live_from_dpm(puuid)
-                        if sigue_en_partida:
-                            # Calcula tiempo transcurrido desde la notificación
-                            tiempo_transcurrido = int(time.time() - cache_entry["timestamp"])
-                            # Crea embed usando el active_game del caché, pero sobreescribe el tiempo
-                            embed, bat_path = await create_match_embed(
-                                cache_entry["active_game"],
-                                mostrar_tiempo=False,  # No muestres el tiempo real
-                                mostrar_hora=True
-                            )
-                            # Agrega campo de tiempo estimado
-                            mins, secs = divmod(tiempo_transcurrido, 60)
-                            embed.add_field(
-                                name="⏳ Tiempo estimado desde notificación",
-                                value=f"{mins}m {secs}s (estimado, por rate limit)",
-                                inline=False
-                            )
-                            embed.title = f"Partida de {display_name}! 🎮 (rate limit, datos estimados)"
-                            if bat_path:
-                                await ctx.send(
-                                    content=f"⬇️ Archivo para espectar la partida de {display_name}: (datos estimados por rate limit)",
-                                    embed=embed,
-                                    file=nextcord.File(bat_path, filename="spectate_lol.bat")
-                                )
-                            else:
-                                await ctx.send(embed=embed)
-                            return
+                        now = time.time()
+                        # Si tenemos game_length real, úsalo como base y suma el tiempo desde que se guardó
+                        if cache_entry.get("game_length") is not None:
+                            tiempo_transcurrido = cache_entry["game_length"] + int(now - cache_entry["timestamp"])
                         else:
-                            await ctx.send(f"❌ {display_name} no está en ninguna partida activa (según dpm.lol).")
-                            return
+                            tiempo_transcurrido = int(now - cache_entry["timestamp"])
+                        embed, bat_path = await create_match_embed(
+                            cache_entry["active_game"],
+                            mostrar_tiempo=False,
+                            mostrar_hora=True
+                        )
+                        mins, secs = divmod(tiempo_transcurrido, 60)
+                        embed.add_field(
+                            name="⏳ Tiempo estimado desde notificación",
+                            value=f"{mins}m {secs}s (estimado, por rate limit)",
+                            inline=False
+                        )
+                        embed.title = f"Partida de {display_name}! 🎮 (rate limit, datos estimados)"
+                        if bat_path:
+                            await ctx.send(
+                                content=f"⬇️ Archivo para espectar la partida de {display_name}: (datos estimados por rate limit)",
+                                embed=embed,
+                                file=nextcord.File(bat_path, filename="spectate_lol.bat")
+                            )
+                        else:
+                            await ctx.send(embed=embed)
+                        # AGREGA A LA COLA DE REINTENTO DIFERIDO
+                        add_to_retry_queue(puuid)
+                        return
                     else:
                         await ctx.send("⚠️ No se pudo consultar la partida activa por límite de peticiones de Riot y no hay datos de respaldo.")
+                        # AGREGA A LA COLA DE REINTENTO DIFERIDO IGUALMENTE
+                        add_to_retry_queue(puuid)
                         return
                 if intento < max_retries - 1:
                     await asyncio.sleep(delay)
@@ -223,7 +256,8 @@ async def on_ready():
     
     check_games_loop.start()
     actualizar_accounts_json.start()
-    actualizar_puuids.start()   
+    actualizar_puuids.start()
+     
 
 
 @tasks.loop(seconds=60)
@@ -246,6 +280,21 @@ async def actualizar_puuids():
     import subprocess
     subprocess.run(["python", "-m", "tracking.update_puuids"], check=True)
     print("✅ PUUIDs actualizados.")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

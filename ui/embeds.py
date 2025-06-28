@@ -65,7 +65,7 @@ ROLE_ORDER = ["TOP", "JUNGLE", "MID", "ADC", "SUPPORT"]
 CHAMPION_TO_ROLES = {
     "Aatrox": ["TOP"],
     "Ahri": ["MID"],
-    "Akali": ["MID", "TOP"],
+    "Akali": ["TOP", "MID"],
     "Akshan": ["MID", "ADC"],
     "Alistar": ["SUPPORT"],
     "Amumu": ["JUNGLE"],
@@ -304,16 +304,17 @@ async def ordenar_equipo_por_rol(participants, team_id):
 
 async def create_match_embed(active_game: dict, mostrar_tiempo: bool = True, mostrar_hora: bool = True) -> tuple[nextcord.Embed, Optional[str]]:
     participants = active_game["participants"]
-    print("=== PARTICIPANTS DEBUG ===")
-    for p in participants:
-        print(
-            f"Summoner: {p.get('summonerName', '???')}, "
-            f"ChampionId: {p.get('championId')}, "
-            f"TeamId: {p.get('teamId')}, "
-            f"PUUID: {p.get('puuid')}, "
-            f"MSI: {is_msi_player(p.get('puuid'))}"
-        )
-    print("=========================")
+    
+    #print("=== PARTICIPANTS DEBUG ===")
+    #for p in participants:
+       # print(
+           # f"Summoner: {p.get('summonerName', '???')}, "
+            #f"ChampionId: {p.get('championId')}, "
+           # f"TeamId: {p.get('teamId')}, "
+          #  f"PUUID: {p.get('puuid')}, "
+          #  f"MSI: {is_msi_player(p.get('puuid'))}"
+       # )
+   # print("=========================")
 
 
 
