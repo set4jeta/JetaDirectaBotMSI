@@ -8,3 +8,14 @@ if os.path.exists(JSON_PATH):
         MSI_PLAYERS = json.load(f)
 else:
     MSI_PLAYERS = []
+    
+    
+
+def reload_msi_players():
+    global MSI_PLAYERS
+    if os.path.exists(JSON_PATH):
+        with open(JSON_PATH, "r", encoding="utf-8") as f:
+            MSI_PLAYERS = json.load(f)
+    else:
+        MSI_PLAYERS = []    
+    

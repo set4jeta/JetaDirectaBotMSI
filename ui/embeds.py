@@ -255,43 +255,24 @@ async def ordenar_equipo_por_rol(participants, team_id):
                 "role": None
             })
 
-    usados = set()
     asignados = {}
+    sin_asignar = jugadores[:]
+    roles_disponibles = set(ROLE_ORDER)
 
-    # Mientras queden roles sin asignar
-    for _ in range(len(ROLE_ORDER)):
-        # Busca todos los jugadores sin rol
-        sin_rol = [j for j in jugadores if not j["role"]]
-        if not sin_rol:
-            break
-
-        # Para cada rol disponible, busca el jugador con menos opciones y mayor prioridad para ese rol
-        mejor_jugador = None
-        mejor_rol = None
-        mejor_prioridad = 99
-        mejor_opciones = 99
-
-        for rol in ROLE_ORDER:
-            if rol in usados:
-                continue
-            for j in sin_rol:
-                if rol in j["roles"]:
-                    prioridad = j["roles"].index(rol)
-                    opciones = len(j["roles"])
-                    if (prioridad < mejor_prioridad) or (prioridad == mejor_prioridad and opciones < mejor_opciones):
-                        mejor_jugador = j
-                        mejor_rol = rol
-                        mejor_prioridad = prioridad
-                        mejor_opciones = opciones
-
-        if mejor_jugador and mejor_rol:
-            mejor_jugador["role"] = mejor_rol
-            usados.add(mejor_rol)
+    for rol in ROLE_ORDER:
+        # Busca candidatos para este rol entre los que no tienen rol aún
+        candidatos = [j for j in sin_asignar if rol in j["roles"]]
+        if candidatos:
+            # Elige el que tenga menos opciones (menos flexibilidad)
+            candidato = min(candidatos, key=lambda j: len(j["roles"]))
+            candidato["role"] = rol
+            asignados[rol] = candidato
+            sin_asignar.remove(candidato)
+            roles_disponibles.remove(rol)
 
     # Si queda alguien sin rol, asigna FILL
-    for j in jugadores:
-        if not j["role"]:
-            j["role"] = "FILL"
+    for j in sin_asignar:
+        j["role"] = "FILL"
 
     # Ordena por ROLE_ORDER
     jugadores.sort(key=lambda x: ROLE_ORDER.index(x["role"]) if x["role"] in ROLE_ORDER else 99)
@@ -356,10 +337,9 @@ async def create_match_embed(active_game: dict, mostrar_tiempo: bool = True, mos
 
     # Formatea la hora de inicio
     if isinstance(game_start_time, int):
-        # Convierte de ms a segundos y a hora local
-        dt = datetime.datetime.fromtimestamp(game_start_time / 1000)
-        hora_inicio_str = dt.strftime("%H:%M:%S")
-        fecha_inicio_str = dt.strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = int(game_start_time / 1000)
+        hora_inicio_str = f"<t:{timestamp}:T>"
+        fecha_inicio_str = f"<t:{timestamp}:F>"
     else:
         hora_inicio_str = "Desconocida"
         fecha_inicio_str = "Desconocida"

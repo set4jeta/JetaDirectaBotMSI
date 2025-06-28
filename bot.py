@@ -5,7 +5,7 @@ from nextcord.ext import commands, tasks
 from config import DISCORD_TOKEN
 from tracking.tracker import check_active_games, save_channel_id
 from tracking.active_game_cache import get_active_game_cache
-from tracking.accounts import MSI_PLAYERS
+from tracking.accounts import MSI_PLAYERS, reload_msi_players
 from riot.riot_api import get_ranked_data, get_active_game, get_match_ids_by_puuid, get_match_by_id
 from ui.embeds import create_match_embed
 import time
@@ -75,7 +75,7 @@ CACHE_TTL = 120    # segundos que dura el caché (ajusta a gusto)
 intents = nextcord.Intents.default()
 intents.message_content = True
 
-bot = commands.Bot(command_prefix="!", intents=intents)
+bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
 
 
 
@@ -257,6 +257,15 @@ async def on_ready():
     check_games_loop.start()
     actualizar_accounts_json.start()
     actualizar_puuids.start()
+
+
+@bot.event
+async def on_guild_join(guild):
+    # Intenta enviar un mensaje al primer canal de texto disponible
+    for channel in guild.text_channels:
+        if channel.permissions_for(guild.me).send_messages:
+            await channel.send("¡Hola! Usa `!help` para ver la lista de comandos del bot.")
+            break    
      
 
 
@@ -265,12 +274,14 @@ async def check_games_loop():
     await check_active_games(bot) # type: ignore
     
     
-@tasks.loop(minutes=20)
+@tasks.loop(hours=3)
 async def actualizar_accounts_json():
     print("🔄 Actualizando accounts.json desde dpm.lol…")
     # Ejecuta el script que actualiza accounts.json
     subprocess.run(["python", "-m", "tracking.update_accounts_from_leaderboard"], check=True)
-    print("✅ accounts.json actualizado.")    
+    print("✅ accounts.json actualizado.")
+    reload_msi_players()  # <--- AGREGA ESTA LÍNEA
+    print("✅ MSI_PLAYERS recargado en memoria.")    
 
 
 @tasks.loop(hours=1)
@@ -369,8 +380,8 @@ async def historial(ctx, *, nombre: str):
             emoji = POS_EMOJI.get(pos.upper(), "") if pos else ""
             start_ts = info.get("gameStartTimestamp")
             if isinstance(start_ts, int):
-                dt = datetime.datetime.fromtimestamp(start_ts / 1000)
-                hora_inicio_str = dt.strftime("%H:%M %d-%m-%Y")
+                timestamp = int(start_ts / 1000)
+                hora_inicio_str = f"<t:{timestamp}:f>"
             else:
                 hora_inicio_str = "¿?"
             
@@ -393,3 +404,20 @@ async def historial(ctx, *, nombre: str):
     for i, linea in enumerate(partidas, 1):
         msg += f"{i}. {linea}\n"
     await ctx.send(msg)  
+
+
+
+
+@bot.command(name="help")
+async def help_command(ctx):
+    help_text = (
+        "**Comandos disponibles:**\n"
+        "`!help` - Muestra esta ayuda\n"
+        "`!historial <jugador>` - Muestra las últimas partidas de un jugador MSI\n"
+        "`!setchannel` - Configura este canal para notificaciones automáticas\n"
+        "`!<nombrejugador>` - Muestra la partida activa de un jugador (ej: `!elk`)\n"
+        "`!<equipo>` - Muestra los jugadores de un equipo (ej: `!g2`)\n"
+        "\n"
+        "Las horas de inicio y partidas se muestran automáticamente en tu zona horaria local gracias a Discord.\n"
+    )
+    await ctx.send(help_text)    
