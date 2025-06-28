@@ -101,3 +101,17 @@ async def get_match_by_id(match_id: str) -> dict | None:
             if resp.status == 200:
                 return await resp.json()
             return None
+        
+
+
+async def is_live_from_dpm(puuid):
+    # Consulta el endpoint de dpm.lol para ese jugador
+    url = "https://dpm.lol/v1/leaderboards/custom/f1a01cf4-0352-4dac-9c6d-e8e1e44db67a"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status == 200:
+                data = await resp.json()
+                for player in data.get("players", []):
+                    if player.get("puuid") == puuid:
+                        return player.get("isLive", False)
+    return False        

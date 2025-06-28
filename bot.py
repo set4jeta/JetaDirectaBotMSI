@@ -4,14 +4,16 @@ import datetime
 from nextcord.ext import commands, tasks
 from config import DISCORD_TOKEN
 from tracking.tracker import check_active_games, save_channel_id
+from tracking.active_game_cache import get_active_game_cache
 from tracking.accounts import MSI_PLAYERS
-from riot.riot_api import get_ranked_data, get_active_game, get_match_ids_by_puuid, get_match_by_id
+from riot.riot_api import get_ranked_data, get_active_game, get_match_ids_by_puuid, get_match_by_id, is_live_from_dpm
 from ui.embeds import create_match_embed
 import time
 import asyncio
 import subprocess
 import json
 import os
+
 
 HISTORIAL_CACHE_PATH = os.path.join("tracking", "historial_cache.json")
 
@@ -148,6 +150,44 @@ def add_player_commands(bot):
                     else:
                         await ctx.send(embed=embed)
                     return
+                if status == 429:
+                    # Intenta usar el caché de la última partida anunciada
+                    cache_entry = get_active_game_cache(puuid)
+                    if cache_entry:
+                        # Verifica si sigue en partida usando dpm.lol
+                        sigue_en_partida = await is_live_from_dpm(puuid)
+                        if sigue_en_partida:
+                            # Calcula tiempo transcurrido desde la notificación
+                            tiempo_transcurrido = int(time.time() - cache_entry["timestamp"])
+                            # Crea embed usando el active_game del caché, pero sobreescribe el tiempo
+                            embed, bat_path = await create_match_embed(
+                                cache_entry["active_game"],
+                                mostrar_tiempo=False,  # No muestres el tiempo real
+                                mostrar_hora=True
+                            )
+                            # Agrega campo de tiempo estimado
+                            mins, secs = divmod(tiempo_transcurrido, 60)
+                            embed.add_field(
+                                name="⏳ Tiempo estimado desde notificación",
+                                value=f"{mins}m {secs}s (estimado, por rate limit)",
+                                inline=False
+                            )
+                            embed.title = f"Partida de {display_name}! 🎮 (rate limit, datos estimados)"
+                            if bat_path:
+                                await ctx.send(
+                                    content=f"⬇️ Archivo para espectar la partida de {display_name}: (datos estimados por rate limit)",
+                                    embed=embed,
+                                    file=nextcord.File(bat_path, filename="spectate_lol.bat")
+                                )
+                            else:
+                                await ctx.send(embed=embed)
+                            return
+                        else:
+                            await ctx.send(f"❌ {display_name} no está en ninguna partida activa (según dpm.lol).")
+                            return
+                    else:
+                        await ctx.send("⚠️ No se pudo consultar la partida activa por límite de peticiones de Riot y no hay datos de respaldo.")
+                        return
                 if intento < max_retries - 1:
                     await asyncio.sleep(delay)
             await ctx.send(f"❌ {display_name} no está en ninguna partida activa.")
@@ -180,6 +220,7 @@ add_player_commands(bot)
 @bot.event
 async def on_ready():
     print(f"✅ Bot conectado como {bot.user}")
+    
     check_games_loop.start()
     actualizar_accounts_json.start()
     actualizar_puuids.start()   

@@ -5,6 +5,7 @@ import os
 from riot.riot_api import get_active_game, is_valid_puuid
 from ui.embeds import create_match_embed, QUEUE_ID_TO_NAME
 from tracking.accounts import MSI_PLAYERS
+from tracking.active_game_cache import set_active_game
 from utils.spectate_bat import generar_bat_spectate
 import nextcord 
 
@@ -151,5 +152,12 @@ async def check_active_games(bot):
                 )
             else:
                 await channel.send(embed=embed)
+                
+            
 
-    save_retry_queue(new_retry_queue)                 
+            # GUARDA EL CACHÉ PARA TODOS LOS MSI EN LA PARTIDA
+            
+            for msi_puuid in msi_puuids:
+                set_active_game(msi_puuid, active_game)
+
+    save_retry_queue(new_retry_queue)

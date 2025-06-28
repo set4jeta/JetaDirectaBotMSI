@@ -3,6 +3,7 @@
 import asyncio
 import subprocess
 from config import DISCORD_TOKEN
+from keep_alive import keep_alive
 
 from bot import bot
 
@@ -23,4 +24,5 @@ if __name__ == "__main__":
 
     # 3) Arranca el bot
     print("🚀 Iniciando bot de Discord…")
+    keep_alive() # Mantiene el bot activo en Discloud
     bot.run(DISCORD_TOKEN)
