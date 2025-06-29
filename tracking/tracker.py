@@ -116,6 +116,7 @@ async def check_active_games(bot):
             print(f"[SKIP] {player.get('name', puuid)}: Queue {active_game.get('gameQueueConfigId')} no válida.")
             i += 1
             continue
+        set_active_game(puuid, active_game)  # <-- Añade esta línea aquí
         participants = active_game.get("participants", [])
         team_ids = {p["teamId"] for p in participants}
         if not (100 in team_ids and 200 in team_ids):
