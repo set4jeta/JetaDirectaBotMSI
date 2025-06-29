@@ -272,6 +272,7 @@ add_player_commands(bot)
 
 @bot.event
 async def on_ready():
+    await bot.change_presence(activity=nextcord.Game(name="Escribe !help"))
     print(f"✅ Bot conectado como {bot.user}")
     
     check_games_loop.start()
@@ -330,6 +331,7 @@ async def actualizar_puuids():
 
 
 @bot.command()
+@commands.has_permissions(administrator=True)
 async def setchannel(ctx):
     """Guarda este canal como el canal de notificaciones para este servidor."""
     guild_id = ctx.guild.id
@@ -339,6 +341,27 @@ async def setchannel(ctx):
     await ctx.send(f"✅ Canal de notificaciones configurado para este servidor: {ctx.channel.mention}")
     
     
+    
+    
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def unsubscribe(ctx):
+    """Quita el canal de notificaciones del servidor actual."""
+    guild_id = str(ctx.guild.id)
+    config_path = os.path.join(os.path.dirname(__file__), "tracking", "notify_config.json")
+    if not os.path.exists(config_path):
+        await ctx.send("No hay canales suscritos todavía.")
+        return
+    import json
+    with open(config_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    if guild_id in data:
+        del data[guild_id]
+        with open(config_path, "w", encoding="utf-8") as f2:
+            json.dump(data, f2, ensure_ascii=False, indent=2)
+        await ctx.send("✅ Canal de notificaciones eliminado para este servidor.")
+    else:
+        await ctx.send("Este servidor no tenía canal de notificaciones configurado.")
     
     
 @bot.command()
@@ -433,13 +456,14 @@ async def help_command(ctx):
     help_text = (
         "**Comandos disponibles:**\n"
         "`!help` - Muestra esta ayuda\n"
-        "`!setchannel` - Configura este canal para notificaciones automáticas\n"
+        "`!setchannel` - Configura este canal para notificaciones automáticas(solo admin)\n"
         "`!<equipo>` - Muestra los jugadores de un equipo (ej: `!g2`)\n"
         "`!live` - Muestra los jugadores MSI actualmente en partida\n"
         "`!<nombrejugador>` - Muestra la partida activa de un jugador (ej: `!elk`)\n"
         "`!historial <jugador>` - Muestra las últimas partidas de un jugador MSI\n"
         "`!ranking` - Muestra la tabla de clasificación actual de los jugadores MSI\n"
-        
+        "`!unsubscribe` - Elimina el canal de notificaciones del servidor (solo admin)\n"
+
         "\n"
         "Las horas de inicio y partidas se muestran automáticamente en tu zona horaria local gracias a Discord.\n"
         "Si ves un mensaje de rate limit en los mensajes de partida, significa que Riot está limitando las peticiones (poca capacidad de respuesta).\n"
