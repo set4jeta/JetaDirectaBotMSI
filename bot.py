@@ -7,13 +7,14 @@ from tracking.tracker import check_active_games, save_channel_id
 from tracking.active_game_cache import get_active_game_cache, ACTIVE_GAME_CACHE
 from tracking.accounts import MSI_PLAYERS, reload_msi_players
 from tracking.update_accounts_from_leaderboard import fetch_leaderboard
-from riot.riot_api import get_ranked_data, get_active_game, get_match_ids_by_puuid, get_match_by_id
+from riot.riot_api import get_ranked_data, get_active_game, get_match_ids_by_puuid, get_match_by_id, get_puuid_from_riot_id
 from ui.embeds import create_match_embed, get_player_display, get_champion_name_by_id
 import time
 import asyncio
 import subprocess
 import json
 import os
+ACCOUNTS_PATH = os.path.join(os.path.dirname(__file__), "tracking", "accounts.json")
 
 RANKING_CACHE_PATH = os.path.join("tracking", "ranking_cache.json")
 RANKING_CACHE_TTL = 1800  # 30 minutos
@@ -274,10 +275,13 @@ add_player_commands(bot)
 async def on_ready():
     await bot.change_presence(activity=nextcord.Game(name="Escribe !help"))
     print(f"✅ Bot conectado como {bot.user}")
-    
-    check_games_loop.start()
-    actualizar_accounts_json.start()
-    actualizar_puuids.start()
+
+    if not check_games_loop.is_running():
+        check_games_loop.start()
+    if not actualizar_accounts_json.is_running():
+        actualizar_accounts_json.start()
+    if not actualizar_puuids_poco_a_poco.is_running():
+        actualizar_puuids_poco_a_poco.start()
 
 
 @bot.event
@@ -305,13 +309,32 @@ async def actualizar_accounts_json():
     print("✅ MSI_PLAYERS recargado en memoria.")    
 
 
-@tasks.loop(hours=1)
-async def actualizar_puuids():
-    await asyncio.sleep(3600)
-    print("🔄 Actualizando PUUIDs de todos los jugadores…")
-    import subprocess
-    subprocess.run(["python", "-m", "tracking.update_puuids"], check=True)
-    print("✅ PUUIDs actualizados.")
+@tasks.loop(seconds=60)
+async def actualizar_puuids_poco_a_poco():
+    # Guarda el índice actual en un archivo o variable global si quieres persistencia
+    if not hasattr(actualizar_puuids_poco_a_poco, "i"):
+        actualizar_puuids_poco_a_poco.i = 0
+    i = actualizar_puuids_poco_a_poco.i # type: ignore
+
+    if i >= len(MSI_PLAYERS):
+        actualizar_puuids_poco_a_poco.i = 0 # type: ignore
+        return
+
+    player = MSI_PLAYERS[i]
+    riot_id = player["riot_id"]
+    game_name = riot_id["game_name"]
+    tag_line = riot_id["tag_line"]
+    print(f"🔄 Revisando PUUID para {player['name']} ({game_name}#{tag_line})...")
+    puuid_real, status = await get_puuid_from_riot_id(game_name, tag_line)
+    if puuid_real and puuid_real != player.get("puuid"):
+        print(f"✅ PUUID actualizado para {player['name']}")
+        player["puuid"] = puuid_real
+        # Guarda el cambio
+        with open(ACCOUNTS_PATH, "w", encoding="utf-8") as f:
+            json.dump(MSI_PLAYERS, f, ensure_ascii=False, indent=2)
+    else:
+        print(f"PUUID sin cambios para {player['name']}")
+    actualizar_puuids_poco_a_poco.i += 1 # type: ignore
 
 
 
@@ -434,15 +457,15 @@ async def historial(ctx, *, nombre: str):
             cache[puuid] = {"timestamp": now, "partidas": partidas}
             save_historial_cache(cache)
 
-        if not partidas:
-            nick_str = f"{player['name']} ({game_name}#{tag_line})" if game_name and tag_line else player['name']
-            await ctx.send(f"{nick_str} no ha jugado partidas en las últimas 15h.")
-            continue
-
         riot_id = player.get("riot_id", {})
         game_name = riot_id.get("game_name", "")
         tag_line = riot_id.get("tag_line", "")
         nick_str = f"{player['name']} ({game_name}#{tag_line})" if game_name and tag_line else player['name']
+
+        if not partidas:
+            await ctx.send(f"{nick_str} no ha jugado partidas en las últimas 15h.")
+            continue
+
         msg = f"**{nick_str}** últimas partidas 15h:\n\n"
         for i, linea in enumerate(partidas, 1):
             msg += f"{i}. {linea}\n"
@@ -543,7 +566,8 @@ async def ranking(ctx):
         for p in players:
             name = p.get("displayName", p.get("gameName", "???"))
             team = p.get("team", "")
-            role = p.get("lane", {}).get("value", "")
+            lane = p.get("lane") or {}
+            role = lane.get("value", "")
             rank_data = p.get("rank") or {}
             rank_tier = rank_data.get("tier", "")
             rank_div = rank_data.get("rank", "")

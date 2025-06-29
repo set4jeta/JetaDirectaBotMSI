@@ -1,6 +1,6 @@
 import asyncio
 import os
-from tracking.accounts import MSI_PLAYERS
+from tracking.accounts import MSI_PLAYERS              #ARCHIVO NO EN USO, SIRVE PARA ACTUALIZAR DE GOLPE LA LISTA DE PUUIDS
 from riot.riot_api import get_puuid_from_riot_id
 import json
 

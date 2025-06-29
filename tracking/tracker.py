@@ -8,11 +8,34 @@ from tracking.accounts import MSI_PLAYERS
 from tracking.active_game_cache import set_active_game
 from utils.spectate_bat import generar_bat_spectate
 import nextcord
+import time
 
 last_checked_index = 0
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "notify_config.json")
 RETRY_PATH = os.path.join(os.path.dirname(__file__), "puuid_retry_queue.json")
+LAST_INDEX_PATH = os.path.join(os.path.dirname(__file__), "last_checked_index.json")
+ANNOUNCED_GAMES_PATH = os.path.join(os.path.dirname(__file__), "announced_games.json")
 announced_games = set()
+
+# Utilidades para estado por canal
+
+def load_per_channel_json(path, default_factory=dict):
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            try:
+                data = json.load(f)
+                # MIGRACIÓN: si es una lista, conviértelo a dict vacío (solo para retry_queue)
+                if isinstance(data, list):
+                    print(f"[MIGRACIÓN] El archivo {path} estaba en formato lista, convirtiendo a dict vacío.")
+                    return default_factory()
+                return data
+            except Exception:
+                return default_factory()
+    return default_factory()
+
+def save_per_channel_json(path, data):
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
 def load_retry_queue():
     if os.path.exists(RETRY_PATH):
@@ -39,186 +62,92 @@ def save_channel_id(guild_id: int, channel_id: int):
 async def check_active_games(bot):
     channel_ids = load_channel_ids()
     if not channel_ids:
-        print("⚠️ No hay canales de notificación configurados aún.")
+        print("[INFO] No hay canales configurados para notificaciones.")
         return
 
-    global last_checked_index
-    partidas_ya_checadas = set()
-    retry_queue = load_retry_queue()
-    retry_puuuids = set(r["puuid"] for r in retry_queue)
-    new_retry_queue = []
+    announced_games_map = load_per_channel_json(ANNOUNCED_GAMES_PATH, dict)
+    embed_cache = {}  # game_id: (embed, bat_path)
 
-    print(f"[CICLO] last_checked_index al inicio: {last_checked_index}")
-    print(f"[CICLO] Total jugadores MSI: {len(MSI_PLAYERS)}")
+    # --- RECORRIDO ESTRICTAMENTE SECUENCIAL, 1 POR 1, BLOQUEANTE EN 429 ---
+    if os.path.exists(LAST_INDEX_PATH):
+        with open(LAST_INDEX_PATH, "r", encoding="utf-8") as f:
+            try:
+                last_index_data = json.load(f)
+                last_checked_index = last_index_data.get("last_checked_index", 0)
+            except Exception:
+                last_checked_index = 0
+    else:
+        last_checked_index = 0
 
-    for guild_id_str, channel_id in channel_ids.items():
-        channel = bot.get_channel(channel_id)
-        if not channel:
-            print(f"⚠️ No se encontró el canal configurado: {channel_id}")
+    total_players = len(MSI_PLAYERS)
+    i = last_checked_index
+    while i < total_players:
+        player = MSI_PLAYERS[i]
+        puuid = player.get("puuid")
+        if not puuid:
+            print(f"[WARN] Jugador sin PUUID: {player}")
+            i += 1
             continue
-
-        print(f"🔎 Comprobando partidas activas de MSI_PLAYERS para guild {guild_id_str}...")
-
-        # 1. Si hay retry_queue, SOLO procesar esos jugadores (en orden)
-        if retry_queue:
-            print(f"[RETRY] Procesando {len(retry_queue)} jugadores en retry_queue...")
-            for retry_item in retry_queue:
-                puuid = retry_item["puuid"]
-                player = next((p for p in MSI_PLAYERS if p.get("puuid") == puuid), None)
-                if not player:
-                    print(f"   → PUUID {puuid} de retry_queue no está en MSI_PLAYERS, saltando.")
-                    continue
-                print(f"   → Revisando jugador: {player['name']} ({player['riot_id']['game_name']}#{player['riot_id']['tag_line']}) | PUUID: {puuid} [RETRY QUEUE]")
-                
-                while True:
-                    active_game, status = await get_active_game(puuid)
-                    if status == 429:
-                        print(f"⚠️ Rate limit (429) para {player['name']}, reintentando en 8s...")
-                        await asyncio.sleep(8)
-                        continue
-                    break
-
-                if active_game is None:
-                    if status == 404:
-                        if not await is_valid_puuid(puuid):
-                            print(f"❌ PUUID inválido para {player['name']} ({player['riot_id']['game_name']}#{player['riot_id']['tag_line']}): {puuid}")
-                        else:
-                            print(f"   → {player['name']} NO está en partida activa.")
-                    elif status == 429:
-                        print(f"⚠️ Rate limit (429) para {player['name']}, agregando a retry_queue")
-                        new_retry_queue.append({
-                            "puuid": puuid,
-                            "game_name": player["riot_id"]["game_name"],
-                            "tag_line": player["riot_id"]["tag_line"]
-                        })
-                    else:
-                        print(f"⚠️ Error al consultar partida activa para {player['name']} (status={status})")
-                    continue
-
-                # Resto de la lógica de verificación de partidas...
-                game_type = active_game.get("gameType")
-                game_mode = active_game.get("gameMode")
-                queue_id = active_game.get("gameQueueConfigId")
-
-                if game_type != "MATCHED":
-                    print(f"⏩ Partida ignorada (gameType={game_type}) para {player['name']}")
-                    continue
-                if game_mode != "CLASSIC":
-                    print(f"⏩ Partida ignorada (gameMode={game_mode}) para {player['name']}")
-                    continue
-                if queue_id not in [400, 420, 430, 440]:
-                    if isinstance(queue_id, int):
-                        cola = QUEUE_ID_TO_NAME.get(queue_id, f"Desconocida ({queue_id})")
-                    else:
-                        cola = "Desconocida (None)"
-                    print(f"⏩ Partida ignorada (queueId={queue_id} - {cola}) para {player['name']}")
-                    continue
-
-                participants = active_game.get("participants", [])
-                team_ids = {p["teamId"] for p in participants}
-                if not (100 in team_ids and 200 in team_ids):
-                    print(f"⏩ Partida ignorada (solo un equipo): {active_game.get('gameId')}")
-                    continue
-
-                game_id = active_game.get("gameId")
-                if game_id in partidas_ya_checadas or game_id in announced_games:
-                    continue
-
-                msi_puuids = {p["puuid"] for p in active_game["participants"] if p["puuid"] in {p["puuid"] for p in MSI_PLAYERS}}
-                if not msi_puuids:
-                    continue
-
-                partidas_ya_checadas.add(game_id)
-                announced_games.add(game_id)
-                print(f"   ✅ Anunciando partida {game_id} con MSI: {msi_puuids}")
-
-                embed, bat_path = await create_match_embed(active_game, mostrar_tiempo=False, mostrar_hora=True)
-                if bat_path:
-                    await channel.send(
-                        content="⬇️ **Archivo para espectar la partida:**",
-                        embed=embed,
-                        file=nextcord.File(bat_path, filename="spectate_lol.bat")
-                    )
-                else:
-                    await channel.send(embed=embed)
-
-                for msi_puuid in msi_puuids:
-                    set_active_game(msi_puuid, active_game)
-
-            # No avanzar el índice circular si hubo retry_queue
-            print(f"[CICLO] Retry queue procesada. last_checked_index NO se mueve: {last_checked_index}")
-        else:
-            # 2. Si NO hay retry_queue, procesar ciclo circular completo
-            n = len(MSI_PLAYERS)
-            if n == 0:
-                print("⚠️ No hay jugadores en MSI_PLAYERS.")
-                continue
-            print(f"[CIRCULAR] Procesando ciclo circular desde índice {last_checked_index}")
-            indices = [(last_checked_index + i) % n for i in range(n)]
-            rate_limited_this_cycle = False
-            for offset, idx in enumerate(indices):
-                player = MSI_PLAYERS[idx]
-                puuid = player.get("puuid")
-                print(f"   → Revisando jugador: {player['name']} ({player['riot_id']['game_name']}#{player['riot_id']['tag_line']}) | PUUID: {puuid} | idx_circular: {idx} (offset {offset})")
-                
+        while True:
+            try:
                 active_game, status = await get_active_game(puuid)
-
-                if active_game is None:
-                    if status == 404:
-                        if not await is_valid_puuid(puuid):
-                            print(f"❌ PUUID inválido para {player['name']} ({player['riot_id']['game_name']}#{player['riot_id']['tag_line']}): {puuid}")
-                        else:
-                            print(f"   → {player['name']} NO está en partida activa.")
-                    elif status == 429:
-                        print(f"⚠️ Rate limit (429) para {player['name']}, agregando a retry_queue")
-                        new_retry_queue.append({
-                            "puuid": puuid,
-                            "game_name": player["riot_id"]["game_name"],
-                            "tag_line": player["riot_id"]["tag_line"]
-                        })
-                        rate_limited_this_cycle = True
-                    else:
-                        print(f"⚠️ Error al consultar partida activa para {player['name']} (status={status})")
+            except Exception as e:
+                print(f"[ERROR] Excepción al consultar API para {player.get('name', puuid)}: {e}")
+                await asyncio.sleep(4)
+                continue  # Reintenta indefinidamente si hay error
+            if status == 429:
+                print(f"[RATE LIMIT] 429 para {player.get('name', puuid)}. Reintentando en 4 segundos...")
+                await asyncio.sleep(4)
+                continue  # Reintenta indefinidamente hasta que no sea 429
+            break  # Sale del while True solo si NO es 429 ni error
+        if not active_game:
+            print(f"[NO GAME] {player.get('name', puuid)} no está en partida.")
+            i += 1
+            continue
+        if active_game.get("gameType") != "MATCHED":
+            print(f"[SKIP] {player.get('name', puuid)}: gameType no es MATCHED.")
+            i += 1
+            continue
+        if active_game.get("gameMode") != "CLASSIC":
+            print(f"[SKIP] {player.get('name', puuid)}: gameMode no es CLASSIC.")
+            i += 1
+            continue
+        if active_game.get("gameQueueConfigId") not in [400, 420, 430, 440]:
+            print(f"[SKIP] {player.get('name', puuid)}: Queue {active_game.get('gameQueueConfigId')} no válida.")
+            i += 1
+            continue
+        participants = active_game.get("participants", [])
+        team_ids = {p["teamId"] for p in participants}
+        if not (100 in team_ids and 200 in team_ids):
+            print(f"[SKIP] {player.get('name', puuid)}: Equipos incompletos.")
+            i += 1
+            continue
+        game_id = active_game.get("gameId")
+        msi_puuids = {p["puuid"] for p in participants if p["puuid"] in {p["puuid"] for p in MSI_PLAYERS}}
+        if not msi_puuids:
+            print(f"[SKIP] {player.get('name', puuid)}: Ningún MSI PUUID en partida.")
+            i += 1
+            continue
+        print(f"[IN GAME] {player.get('name', puuid)} está en partida válida (gameId={game_id}). Notificando canales...")
+        for guild_id_str, channel_id in channel_ids.items():
+            chan_map = announced_games_map.get(str(channel_id), {})
+            if str(game_id) in chan_map:
+                print(f"[SKIP] Ya se notificó gameId={game_id} en canal {channel_id}.")
+                continue
+            channel = bot.get_channel(channel_id)
+            if not channel:
+                print(f"[ERROR] Canal {channel_id} no encontrado en el bot.")
+                continue
+            if game_id not in embed_cache:
+                try:
+                    embed, bat_path = await create_match_embed(active_game, mostrar_tiempo=False, mostrar_hora=True)
+                    embed_cache[game_id] = (embed, bat_path)
+                except Exception as e:
+                    print(f"[ERROR] No se pudo crear embed para gameId={game_id}: {e}")
                     continue
-
-                # Resto de la lógica de verificación de partidas...
-                game_type = active_game.get("gameType")
-                game_mode = active_game.get("gameMode")
-                queue_id = active_game.get("gameQueueConfigId")
-
-                if game_type != "MATCHED":
-                    print(f"⏩ Partida ignorada (gameType={game_type}) para {player['name']}")
-                    continue
-                if game_mode != "CLASSIC":
-                    print(f"⏩ Partida ignorada (gameMode={game_mode}) para {player['name']}")
-                    continue
-                if queue_id not in [400, 420, 430, 440]:
-                    if isinstance(queue_id, int):
-                        cola = QUEUE_ID_TO_NAME.get(queue_id, f"Desconocida ({queue_id})")
-                    else:
-                        cola = "Desconocida (None)"
-                    print(f"⏩ Partida ignorada (queueId={queue_id} - {cola}) para {player['name']}")
-                    continue
-
-                participants = active_game.get("participants", [])
-                team_ids = {p["teamId"] for p in participants}
-                if not (100 in team_ids and 200 in team_ids):
-                    print(f"⏩ Partida ignorada (solo un equipo): {active_game.get('gameId')}")
-                    continue
-
-                game_id = active_game.get("gameId")
-                if game_id in partidas_ya_checadas or game_id in announced_games:
-                    continue
-
-                msi_puuids = {p["puuid"] for p in active_game["participants"] if p["puuid"] in {p["puuid"] for p in MSI_PLAYERS}}
-                if not msi_puuids:
-                    continue
-
-                partidas_ya_checadas.add(game_id)
-                announced_games.add(game_id)
-                print(f"   ✅ Anunciando partida {game_id} con MSI: {msi_puuids}")
-
-                embed, bat_path = await create_match_embed(active_game, mostrar_tiempo=False, mostrar_hora=True)
+            else:
+                embed, bat_path = embed_cache[game_id]
+            try:
                 if bat_path:
                     await channel.send(
                         content="⬇️ **Archivo para espectar la partida:**",
@@ -227,14 +156,30 @@ async def check_active_games(bot):
                     )
                 else:
                     await channel.send(embed=embed)
+                print(f"[NOTIFY] Notificación enviada a canal {channel_id} para gameId={game_id}.")
+                chan_map = announced_games_map.setdefault(str(channel_id), {})
+                chan_map[str(game_id)] = int(time.time())
+                announced_games_map[str(channel_id)] = chan_map
+            except Exception as e:
+                print(f"[ERROR] Fallo al enviar notificación a canal {channel_id} para gameId={game_id}: {e}")
+        i += 1
+        await asyncio.sleep(0.5)  # Esperar un poco antes de la siguiente iteración
+    # Guardar el índice para el próximo ciclo
+    with open(LAST_INDEX_PATH, "w", encoding="utf-8") as f:
+        json.dump({"last_checked_index": i if i < total_players else 0}, f)
+    
+     # Limpia gameId viejos (más de 2 horas)
+    now = int(time.time())
+    EXPIRATION = 2 * 3600  # 2 horas en segundos
 
-                for msi_puuid in msi_puuids:
-                    set_active_game(msi_puuid, active_game)
-
-            if not rate_limited_this_cycle:
-                last_checked_index = (last_checked_index + 1) % n
-                print(f"[CICLO] last_checked_index actualizado para el próximo ciclo: {last_checked_index}")
-            else:
-                print(f"[CICLO] Hubo rate limit, last_checked_index NO se mueve: {last_checked_index}")
-
-    save_retry_queue(new_retry_queue)
+    for chan_id, games in announced_games_map.items():
+        # Si es lista antigua, conviértela a dict
+        if isinstance(games, list):
+            games = {str(gid): now for gid in games}
+        # Borra los gameId viejos
+        announced_games_map[chan_id] = {gid: ts for gid, ts in games.items() if now - ts < EXPIRATION}
+    
+    
+    
+    save_per_channel_json(ANNOUNCED_GAMES_PATH, announced_games_map)
+    print(f"[INFO] Ciclo de notificación completado. Próximo ciclo comenzará en el jugador {i if i < total_players else 0}.")
