@@ -73,3 +73,19 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+    
+    
+    
+    
+def fetch_leaderboard():
+    scraper = cloudscraper.create_scraper()
+    resp = scraper.get(ENDPOINT)
+    try:
+        data = resp.json()
+    except Exception as e:
+        print("❌ Error al parsear JSON:", e)
+        return []
+    return data.get("players", [])    
+    
+    

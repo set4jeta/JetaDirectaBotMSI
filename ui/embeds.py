@@ -5,6 +5,7 @@ import pprint
 from riot.riot_api import get_champion_name_by_id, get_ranked_data
 from tracking.accounts import MSI_PLAYERS
 from utils.spectate_bat import generar_bat_spectate
+from datetime import datetime, timedelta
 
 PUUID_TO_PLAYER = {p["puuid"]: p for p in MSI_PLAYERS if "puuid" in p}
 
@@ -345,8 +346,18 @@ async def create_match_embed(active_game: dict, mostrar_tiempo: bool = True, mos
         fecha_inicio_str = "Desconocida"
 
     desc = f"**Cola:** {queue_name}\n**Modo:** {game_mode}"
+    
+    delay_espectador = False
+    if isinstance(game_start_time, int):
+        now_ts = int(datetime.utcnow().timestamp())
+        delay_espectador = (now_ts - int(game_start_time / 1000)) < 0
+    
+    
     if mostrar_tiempo:
-        desc += f"\n**Tiempo transcurrido:** {tiempo_str}"
+        if delay_espectador:
+            desc += f"\n**Tiempo transcurrido:** {tiempo_str} *(-3 min delay de espectador)*"
+        else:
+            desc += f"\n**Tiempo transcurrido:** {tiempo_str}"
     if mostrar_hora:
         desc += f"\n**Hora de inicio:** {fecha_inicio_str}"
 
@@ -426,7 +437,7 @@ async def create_match_embed(active_game: dict, mostrar_tiempo: bool = True, mos
                     "Para volver a jugar partidas normales de LoL o Valorant, "
                     "**reinicia tu PC antes de abrir el cliente**.\n\n"
                     "Si solo quieres espectar, no hay problema."
-                    "(OJO, sólo sirve para partidas que estén en vivo, partida terminada sólo mostrará el minuto final)" 
+                    "(OJO, sólo sirve para partidas que estén en vivo, partida terminada sólo mostrará el minuto final o nada)" 
             ),
             inline=False
         )

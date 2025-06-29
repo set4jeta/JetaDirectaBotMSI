@@ -1,6 +1,6 @@
 # 🧠 MSI Tracker Bot
 
-Bot de Discord para **trackear en tiempo real las partidas de jugadores profesionales** de League of Legends (MSI, Worlds, LEC, LCS, etc.). Muestra información detallada de cada partida y permite espectarlas fácilmente desde el cliente.
+Bot de Discord para **trackear en tiempo real las partidas de jugadores profesionales** de League of Legends (MSI, Worlds, LEC, LCS, etc.). Muestra información detallada de cada partida, permite espectarlas fácilmente desde el cliente y ofrece comandos útiles para la comunidad.
 
 ---
 
@@ -17,6 +17,10 @@ Bot de Discord para **trackear en tiempo real las partidas de jugadores profesio
 - **Comandos personalizados por equipo** (`!g2`, `!mkoi`, etc.) para consultar cuentas y rangos.
 - **Actualización automática** de la base de datos de jugadores desde un endpoint externo.
 - **Soporte multi-servidor** y configuración por canal.
+- **Historial de partidas** por jugador, incluso si tiene varias cuentas.
+- **Soporte para cuentas múltiples por jugador** (muestra historial de todas las cuentas asociadas al nombre).
+- **Gestión de rate limits** de Riot, con reintentos automáticos y mensajes claros.
+- **Actualización automática de PUUIDs** y fusión de cuentas manuales/automáticas.
 
 ---
 
@@ -35,103 +39,142 @@ Bot de Discord para **trackear en tiempo real las partidas de jugadores profesio
    Solo debes ejecutar el `.bat` adjunto con el cliente de LoL cerrado, y entrarás en modo espectador directo.
 
 5. **Comandos por equipo:**  
-   Usa comandos como `!g2`, `!mkoi`, etc., para ver los jugadores y rangos de cada equipo.
+   Usa comandos como `!g2`, `!fly`, etc. para ver los jugadores y sus rangos.
+
+6. **Historial de partidas:**  
+   Usa `!historial <jugador>` para ver las últimas partidas de un jugador (soporta varias cuentas con el mismo nombre).
+
+7. **Soporte multi-servidor:**  
+   Puedes configurar el canal de anuncios en cada servidor con `!setchannel`.
 
 ---
 
-## 📦 Estructura del proyecto
+## 📦 Requisitos y dependencias
 
-```
-msi_tracker_bot/
-├── bot.py                          # Inicio y comandos del bot
-├── main.py                         # Script principal
-├── config.py                       # Variables de entorno (.env)
-├── .gitignore                      # Archivos a ignorar por Git
-├── requirements.txt                # Dependencias del proyecto
-├── .env.example                    # Ejemplo de archivo de configuración
-├── spectate_lol.bat                # Archivo generador para espectar partidas
-├── riot/
-│   ├── __init__.py
-│   ├── riot_api.py                 # Funciones para consultar la API de Riot
-│   ├── champion_cache.py           # Diccionario de campeones por ID
-│   ├── champion_data_raw.json
-│   └── res/
-│       └── champion_data_raw_res.json
-├── tracking/
-│   ├── __init__.py
-│   ├── tracker.py                  # Lógica de trackeo de partidas
-│   ├── accounts.py                 # Manejo de jugadores MSI
-│   ├── accounts.json               # Datos de jugadores
-│   ├── update_accounts_from_leaderboard.py
-│   └── update_puuids.py
-├── ui/
-│   ├── __init__.py
-│   └── embeds.py                   # Generación de embeds
-├── utils/
-│   ├── logger.py
-│   └── spectate_bat.py             # Generación del archivo .bat
-└── README.md
-```
+- Python 3.10+
+- Discord bot token (añádelo en un archivo `.env` como `DISCORD_TOKEN`)
+- Riot API Key (añádelo en `.env` como `RIOT_API_KEY`)
+- [requirements.txt](./requirements.txt):
+  - nextcord
+  - aiohttp
+  - python-dotenv
+  - cloudscraper
+  - flask
 
----
-
-## ⚙️ Instalación y configuración
-
-1. **Clona el repositorio:**
-
-```sh
-git clone https://github.com/tu_usuario/msi-tracker-bot.git
-cd msi-tracker-bot
-```
-
-2. **Instala las dependencias:**
-
-```sh
+Instala dependencias con:
+```bash
 pip install -r requirements.txt
 ```
 
-3. **Configura las variables de entorno:**
+---
 
-Copia el archivo `.env.example` a `.env` y edítalo con tus claves:
+## ⚙️ Instalación y despliegue
 
-```
-RIOT_API_KEY=tu_api_key_de_riot
-DISCORD_TOKEN=tu_token_de_discord
-```
-
+1. **Clona el repositorio:**
+   ```bash
+   git clone https://github.com/tuusuario/msi-tracker-bot.git
+   cd msi-tracker-bot
+   ```
+2. **Crea un archivo `.env`** con tu token de Discord y tu Riot API Key:
+   ```env
+   DISCORD_TOKEN=tu_token_de_discord
+   RIOT_API_KEY=tu_api_key_de_riot
+   ```
+3. **Instala las dependencias:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 4. **Ejecuta el bot:**
+   ```bash
+   python main.py
+   ```
 
-```sh
-python main.py
+---
+
+## 📝 Uso de comandos
+
+- `!help` — Muestra la ayuda y comandos disponibles.
+- `!setchannel` — Configura el canal actual para anuncios automáticos.
+- `!<equipo>` — Muestra los jugadores de un equipo (ej: `!g2`, `!fly`).
+- `!<nombrejugador>` — Muestra la partida activa de un jugador (ej: `!elk`).
+- `!historial <jugador>` — Muestra las últimas partidas de un jugador MSI (si tiene varias cuentas, muestra todas).
+- `!ranking` — Muestra la tabla de clasificación actual de los jugadores MSI.
+- `!live` — Muestra los jugadores MSI actualmente en partida (según el caché).
+
+---
+
+## 👤 Uso para usuarios
+
+- **Ver partidas activas:**  
+  Simplemente escribe el nombre del jugador o el comando de equipo.
+- **Ver historial:**  
+  Usa `!historial <nombre>` para ver las últimas partidas de todas las cuentas asociadas a ese nombre.
+- **Espectar partidas:**  
+  Descarga y ejecuta el `.bat` adjunto al anuncio de partida (cierra el cliente de LoL antes).
+- **Ver equipos y rangos:**  
+  Usa los comandos de equipo para ver la plantilla y el rango de cada jugador.
+
+---
+
+## 🛡️ Seguridad y buenas prácticas
+
+- **No compartas tu token de Discord ni tu Riot API Key.**
+- El archivo `.env` **no debe subirse a GitHub** (está en `.gitignore`).
+- El bot maneja rate limits de Riot automáticamente, pero si ves mensajes de rate limit, espera unos minutos.
+
+---
+
+## 🧩 Estructura del proyecto
+
+```
+msi_tracker_bot/
+├── bot.py                # Lógica principal del bot y comandos
+├── main.py               # Arranque y actualización de cuentas
+├── config.py             # Carga de variables de entorno
+├── requirements.txt      # Dependencias
+├── README.md             # Este archivo
+├── riot/                 # Lógica de integración con Riot API
+├── tracking/             # Gestión de cuentas, cachés y ciclo de chequeo
+├── ui/                   # Embeds y helpers visuales
+├── utils/                # Utilidades varias (ej: generación de .bat)
+└── ...
 ```
 
 ---
 
-## 💬 Comandos útiles
+## 🧑‍💻 Desarrollo y contribución
 
-| Comando         | Descripción                                         |
-|-----------------|-----------------------------------------------------|
-| `!setchannel`   | Define el canal actual como canal de notificaciones |
-| `!<equipo>`     | Muestra los jugadores y rangos de un equipo (ej: `!g2`, `!mkoi`) |
+- Puedes añadir nuevos comandos, equipos o mejorar la lógica de trackeo.
+- Si quieres añadir más endpoints o modos de juego, revisa la carpeta `riot/`.
+- Para añadir jugadores manualmente, edita `tracking/accounts.json`.
+- Si encuentras bugs o tienes sugerencias, abre un issue o un pull request.
 
 ---
 
-## 🛡️ Seguridad
+## ❓ Preguntas frecuentes
 
-- El bot **nunca expone tus claves** ni sube datos sensibles.
-- El archivo `.bat` solo automatiza la ejecución del cliente de LoL en modo espectador.
+- **¿Por qué no aparecen partidas nuevas?**  
+  Puede que el jugador no haya jugado en las últimas horas, o que Riot esté limitando las peticiones.
+- **¿Por qué el .bat no funciona?**  
+  Asegúrate de tener el cliente de LoL cerrado y la ruta correcta en el archivo.
+- **¿Puedo usar el bot en varios servidores?**  
+  Sí, cada servidor puede configurar su canal de anuncios.
+- **¿Puedo añadir más equipos o jugadores?**  
+  Sí, edita el archivo `accounts.json` y reinicia el bot.
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto está bajo la licencia **MIT**.
+Este proyecto es open source bajo licencia MIT. Puedes usarlo, modificarlo y compartirlo libremente.
 
 ---
 
-## ✨ Créditos
+## 💡 Créditos y agradecimientos
 
-Desarrollado por **set4**.  
-Inspirado por la comunidad de esports y los bots de seguimiento de partidas profesionales.
+- Inspirado por la comunidad de LoL y los fans de los torneos internacionales.
+- Gracias a Riot Games por la API y a todos los contribuidores del proyecto.
 
-> ¡Pull requests y sugerencias son bienvenidas!
+---
+
+¡Disfruta trackeando partidas y espectando a los mejores jugadores del mundo!

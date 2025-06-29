@@ -4,15 +4,35 @@ import datetime
 from nextcord.ext import commands, tasks
 from config import DISCORD_TOKEN
 from tracking.tracker import check_active_games, save_channel_id
-from tracking.active_game_cache import get_active_game_cache
+from tracking.active_game_cache import get_active_game_cache, ACTIVE_GAME_CACHE
 from tracking.accounts import MSI_PLAYERS, reload_msi_players
+from tracking.update_accounts_from_leaderboard import fetch_leaderboard
 from riot.riot_api import get_ranked_data, get_active_game, get_match_ids_by_puuid, get_match_by_id
-from ui.embeds import create_match_embed
+from ui.embeds import create_match_embed, get_player_display, get_champion_name_by_id
 import time
 import asyncio
 import subprocess
 import json
 import os
+
+RANKING_CACHE_PATH = os.path.join("tracking", "ranking_cache.json")
+RANKING_CACHE_TTL = 1800  # 30 minutos
+
+def load_ranking_cache():
+    if os.path.exists(RANKING_CACHE_PATH):
+        with open(RANKING_CACHE_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            if time.time() - data.get("timestamp", 0) < RANKING_CACHE_TTL:
+                return data["ranking"]
+    return None
+
+def save_ranking_cache(ranking):
+    with open(RANKING_CACHE_PATH, "w", encoding="utf-8") as f:
+        json.dump({"timestamp": time.time(), "ranking": ranking}, f, ensure_ascii=False, indent=2)
+
+
+
+
 
 
 HISTORIAL_CACHE_PATH = os.path.join("tracking", "historial_cache.json")
@@ -325,85 +345,85 @@ async def setchannel(ctx):
 async def historial(ctx, *, nombre: str):
     import time
     nombre = nombre.strip().lower()
-    player = next((p for p in MSI_PLAYERS if p["name"].lower() == nombre), None)
-    if not player:
+    players = [p for p in MSI_PLAYERS if p["name"].lower() == nombre]  # Busca TODAS las cuentas
+    if not players:
         await ctx.send(f"No se encontró el jugador '{nombre}'.")
         return
-    puuid = player.get("puuid")
-    if not puuid:
-        await ctx.send(f"No hay PUUID para {player['name']}.")
-        return
+    for player in players:  # Añade esta línea (y luego INDENTA TODO LO QUE SIGUE)
+        puuid = player.get("puuid")
+        if not puuid:
+            await ctx.send(f"No hay PUUID para {player['name']}.")
+            continue  # Cambiamos 'return' por 'continue' para que revise la siguiente cuenta
 
-    cache = load_historial_cache()
-    now = int(time.time())
-    cache_entry = cache.get(puuid)
-    # Si hay caché y no han pasado 15h, úsalo
-    HISTORIAL_HORAS = 15
-    
-    if cache_entry and now - cache_entry["timestamp"] < HISTORIAL_HORAS * 3600:
-        partidas = cache_entry["partidas"]
-    else:
-        match_ids = []  # <-- ¡Esta línea debe estar aquí!
-        for queue_id in [420, 440]:
-            ids = await get_match_ids_by_puuid(puuid, now - HISTORIAL_HORAS * 3600, now, queue=queue_id, count=20)
-            match_ids.extend(ids)
-        match_ids = list(dict.fromkeys(match_ids))
-        print(f"[DEBUG] match_ids obtenidos para {player['name']}: {match_ids}")
-        print(f"[DEBUG] Total match_ids: {len(match_ids)}")
-        partidas = []
-        POS_EMOJI = {
-            "TOP": "🗻",
-            "JUNGLE": "🌲",
-            "MID": "✨",
-            "ADC": "🏹",
-            "BOTTOM": "🏹",
-            "SUPPORT": "🛡️",
-        }
-        for match_id in match_ids:
-            match = await get_match_by_id(match_id)
-            if not match or "info" not in match:
-                continue
-            info = match["info"]
-            duration = info.get("gameDuration", 0)
-            mins = duration // 60
-            part = next((p for p in info["participants"] if p["puuid"] == puuid), None)
-            if not part:
-                continue
-            champ = part.get("championName", "???")
-            kills = part.get("kills", 0)
-            deaths = part.get("deaths", 0)
-            assists = part.get("assists", 0)
-            pos = part.get("teamPosition", "")
-            if pos.upper() == "UTILITY":
-                pos = "SUPPORT"
-            pos_str = f" ({pos.title()})" if pos else ""
-            emoji = POS_EMOJI.get(pos.upper(), "") if pos else ""
-            start_ts = info.get("gameStartTimestamp")
-            if isinstance(start_ts, int):
-                timestamp = int(start_ts / 1000)
-                hora_inicio_str = f"<t:{timestamp}:f>"
-            else:
-                hora_inicio_str = "¿?"
-            
-            
-            
-            partidas.append(f"**{champ}**{pos_str} {emoji} | {kills}/{deaths}/{assists} | {mins} min | 🕒 {hora_inicio_str}")
-        # Guarda en caché
-        cache[puuid] = {"timestamp": now, "partidas": partidas}
-        save_historial_cache(cache)
+        cache = load_historial_cache()
+        now = int(time.time())
+        cache_entry = cache.get(puuid)
+        # Si hay caché y no han pasado 15h, úsalo
+        HISTORIAL_HORAS = 15
+        
+        if cache_entry and now - cache_entry["timestamp"] < HISTORIAL_HORAS * 3600:
+            partidas = cache_entry["partidas"]
+        else:
+            match_ids = []  # <-- ¡Esta línea debe estar aquí!
+            for queue_id in [420, 440]:
+                ids = await get_match_ids_by_puuid(puuid, now - HISTORIAL_HORAS * 3600, now, queue=queue_id, count=20)
+                match_ids.extend(ids)
+            match_ids = list(dict.fromkeys(match_ids))
+            print(f"[DEBUG] match_ids obtenidos para {player['name']}: {match_ids}")
+            print(f"[DEBUG] Total match_ids: {len(match_ids)}")
+            partidas = []
+            POS_EMOJI = {
+                "TOP": "🗻",
+                "JUNGLE": "🌲",
+                "MID": "✨",
+                "ADC": "🏹",
+                "BOTTOM": "🏹",
+                "SUPPORT": "🛡️",
+            }
+            for match_id in match_ids:
+                match = await get_match_by_id(match_id)
+                if not match or "info" not in match:
+                    continue
+                info = match["info"]
+                duration = info.get("gameDuration", 0)
+                mins = duration // 60
+                part = next((p for p in info["participants"] if p["puuid"] == puuid), None)
+                if not part:
+                    continue
+                champ = part.get("championName", "???")
+                kills = part.get("kills", 0)
+                deaths = part.get("deaths", 0)
+                assists = part.get("assists", 0)
+                pos = part.get("teamPosition", "")
+                if pos.upper() == "UTILITY":
+                    pos = "SUPPORT"
+                pos_str = f" ({pos.title()})" if pos else ""
+                emoji = POS_EMOJI.get(pos.upper(), "") if pos else ""
+                start_ts = info.get("gameStartTimestamp")
+                if isinstance(start_ts, int):
+                    timestamp = int(start_ts / 1000)
+                    hora_inicio_str = f"<t:{timestamp}:f>"
+                else:
+                    hora_inicio_str = "¿?"
+                
+                partidas.append(f"**{champ}**{pos_str} {emoji} | {kills}/{deaths}/{assists} | {mins} min | 🕒 {hora_inicio_str}")
+            # Guarda en caché
+            cache[puuid] = {"timestamp": now, "partidas": partidas}
+            save_historial_cache(cache)
 
-    if not partidas:
-        await ctx.send(f"No se pudieron obtener los detalles de las partidas recientes de {player['name']}.")
-        return
+        if not partidas:
+            nick_str = f"{player['name']} ({game_name}#{tag_line})" if game_name and tag_line else player['name']
+            await ctx.send(f"{nick_str} no ha jugado partidas en las últimas 15h.")
+            continue
 
-    riot_id = player.get("riot_id", {})
-    game_name = riot_id.get("game_name", "")
-    tag_line = riot_id.get("tag_line", "")
-    nick_str = f"{player['name']} ({game_name}#{tag_line})" if game_name and tag_line else player['name']
-    msg = f"**{nick_str}** últimas partidas 15h:\n\n"
-    for i, linea in enumerate(partidas, 1):
-        msg += f"{i}. {linea}\n"
-    await ctx.send(msg)  
+        riot_id = player.get("riot_id", {})
+        game_name = riot_id.get("game_name", "")
+        tag_line = riot_id.get("tag_line", "")
+        nick_str = f"{player['name']} ({game_name}#{tag_line})" if game_name and tag_line else player['name']
+        msg = f"**{nick_str}** últimas partidas 15h:\n\n"
+        for i, linea in enumerate(partidas, 1):
+            msg += f"{i}. {linea}\n"
+        await ctx.send(msg)    
 
 
 
@@ -413,11 +433,139 @@ async def help_command(ctx):
     help_text = (
         "**Comandos disponibles:**\n"
         "`!help` - Muestra esta ayuda\n"
-        "`!historial <jugador>` - Muestra las últimas partidas de un jugador MSI\n"
         "`!setchannel` - Configura este canal para notificaciones automáticas\n"
-        "`!<nombrejugador>` - Muestra la partida activa de un jugador (ej: `!elk`)\n"
         "`!<equipo>` - Muestra los jugadores de un equipo (ej: `!g2`)\n"
+        "`!live` - Muestra los jugadores MSI actualmente en partida\n"
+        "`!<nombrejugador>` - Muestra la partida activa de un jugador (ej: `!elk`)\n"
+        "`!historial <jugador>` - Muestra las últimas partidas de un jugador MSI\n"
+        "`!ranking` - Muestra la tabla de clasificación actual de los jugadores MSI\n"
+        
         "\n"
         "Las horas de inicio y partidas se muestran automáticamente en tu zona horaria local gracias a Discord.\n"
+        "Si ves un mensaje de rate limit en los mensajes de partida, significa que Riot está limitando las peticiones (poca capacidad de respuesta).\n"
+        "En ese caso, el bot usará los últimos datos de partida que tenga como respaldo (se actualiza en unos segundos en la mayoria de veces).\n"
+        
     )
-    await ctx.send(help_text)    
+    await ctx.send(help_text)   
+
+
+@bot.command()
+async def live(ctx):
+    """
+    Muestra los jugadores MSI actualmente en partida (según el caché).
+    """
+    now = time.time()
+    vivos = []
+    for puuid, entry in ACTIVE_GAME_CACHE.items():
+        active_game = entry["active_game"]
+        timestamp_guardado = entry["timestamp"]
+        game_length = entry.get("game_length", 0) or 0
+
+        # Calcula el tiempo transcurrido real desde la notificación
+        tiempo_transcurrido = int(game_length + (now - timestamp_guardado))
+        delay_str = ""
+        if tiempo_transcurrido < 0:
+            delay_str = f" (-3 min delay de espectador)"
+            mins, secs = divmod(abs(tiempo_transcurrido), 60)
+            tiempo_str = f"-{mins:02d}:{secs:02d}"
+        else:
+            mins, secs = divmod(tiempo_transcurrido, 60)
+            tiempo_str = f"{mins:02d}:{secs:02d}"
+
+        # Nombre y campeón
+        riot_id = None
+        for p in MSI_PLAYERS:
+            if p.get("puuid") == puuid:
+                riot_id = p.get("riot_id")
+                display_name = p.get("name")
+                break
+        else:
+            display_name = puuid
+
+        # Campeón
+        champ_id = None
+        for part in active_game.get("participants", []):
+            if part.get("puuid") == puuid:
+                champ_id = part.get("championId")
+                break
+        if champ_id is not None:
+            champ_name = await get_champion_name_by_id(champ_id)
+        else:
+            champ_name = "?"
+
+        # Comando sugerido
+        cmd_name = display_name.lower().replace(" ", "")
+
+        vivos.append(f"**{display_name}** ({champ_name}) | {tiempo_str}{delay_str} en partida (`!{cmd_name}` para +info)")
+
+    if not vivos:
+        await ctx.send("No hay jugadores MSI en partida en este momento.")
+    else:
+        msg = "**Jugadores MSI en partida ahora mismo:**\n\n" + "\n".join(vivos)
+        await ctx.send(msg)    
+        
+        
+@bot.command()
+async def ranking(ctx):
+    """
+    Muestra el ranking MSI (caché 3h, fuente dpm.lol)
+    """
+    ranking = load_ranking_cache()
+    if not ranking:
+        players = fetch_leaderboard()
+        # Ordena por leaderboardPosition si existe
+        players.sort(key=lambda p: p.get("leaderboardPosition", 9999))
+        ranking = []
+        for p in players:
+            name = p.get("displayName", p.get("gameName", "???"))
+            team = p.get("team", "")
+            role = p.get("lane", {}).get("value", "")
+            rank_data = p.get("rank") or {}
+            rank_tier = rank_data.get("tier", "")
+            rank_div = rank_data.get("rank", "")
+            rank = f"{rank_tier} {rank_div}".strip()
+            lp = rank_data.get("leaguePoints", 0)
+            wins = rank_data.get("wins", 0)
+            losses = rank_data.get("losses", 0)
+            winrate = f"{round(100 * wins / (wins + losses))}%" if (wins + losses) > 0 else "?"
+            kda = f"{p.get('kda', '?')}"
+            champs = p.get("championIds", [])
+            # Convierte IDs a nombres de campeón
+            champ_names = []
+            from riot.champion_cache import CHAMPION_ID_TO_NAME
+            for cid in champs[:3]:
+                champ_names.append(CHAMPION_ID_TO_NAME.get(str(cid), str(cid)))
+            champ_str = ", ".join(champ_names)
+            ranking.append({
+                "name": name,
+                "team": team,
+                "role": role,
+                "rank": rank,
+                "lp": lp,
+                "winrate": winrate,
+                "kda": kda,
+                "champs": champ_str
+            })
+        save_ranking_cache(ranking)
+
+    lines = [
+        "Pos | Jugador | Equipo | Rol | Rango | LP | Winrate | KDA | Mejores campeones",
+        "----|---------|--------|-----|-------|----|---------|-----|-------------------"
+    ]
+    for i, p in enumerate(ranking, 1):
+        lines.append(
+            f"{i:>2} | {p['name']} | {p['team']} | {p['role']} | {p['rank']} | {p['lp']} | {p['winrate']} | {p['kda']} | {p['champs']}"
+        )
+
+    # Divide en bloques de máximo 2000 caracteres (sin cortar líneas)
+    current_chunk = "```markdown\n"
+    for line in lines:
+        if len(current_chunk) + len(line) + 1 > 1990:  # +1 por el salto de línea final
+            current_chunk += "```"
+            await ctx.send(current_chunk)
+            current_chunk = "```markdown\n"
+        current_chunk += line + "\n"
+
+    if current_chunk.strip() != "```markdown":
+        current_chunk += "```"
+        await ctx.send(current_chunk)
