@@ -253,27 +253,33 @@ async def ordenar_equipo_por_rol(participants, team_id):
                 "spell2": p["spell2Id"],
                 "display": display,
                 "roles": roles,
-                "role": None
+                "role": None,
+                "puuid": puuid
             })
 
-    asignados = {}
-    sin_asignar = jugadores[:]
-    roles_disponibles = set(ROLE_ORDER)
+    # 1. Asigna jungla por Smite
+    junglers = [j for j in jugadores if 11 in (j["spell1"], j["spell2"])]
+    if len(junglers) == 1:
+        junglers[0]["role"] = "JUNGLE"
 
+    # 2. Asigna roles únicos
     for rol in ROLE_ORDER:
-        # Busca candidatos para este rol entre los que no tienen rol aún
-        candidatos = [j for j in sin_asignar if rol in j["roles"]]
-        if candidatos:
-            # Elige el que tenga menos opciones (menos flexibilidad)
-            candidato = min(candidatos, key=lambda j: len(j["roles"]))
-            candidato["role"] = rol
-            asignados[rol] = candidato
-            sin_asignar.remove(candidato)
-            roles_disponibles.remove(rol)
+        candidatos = [j for j in jugadores if j["role"] is None and j["roles"] == [rol]]
+        if len(candidatos) == 1:
+            candidatos[0]["role"] = rol
 
-    # Si queda alguien sin rol, asigna FILL
-    for j in sin_asignar:
-        j["role"] = "FILL"
+    # 3. Asigna el resto por exclusión
+    for rol in ROLE_ORDER:
+        if any(j["role"] == rol for j in jugadores):
+            continue
+        candidatos = [j for j in jugadores if j["role"] is None and rol in j["roles"]]
+        if len(candidatos) == 1:
+            candidatos[0]["role"] = rol
+
+    # 4. Si queda alguien sin rol, asigna por orden de ROLE_ORDER
+    sin_asignar = [j for j in jugadores if j["role"] is None]
+    for j, rol in zip(sin_asignar, [r for r in ROLE_ORDER if not any(x["role"] == r for x in jugadores)]):
+        j["role"] = rol
 
     # Ordena por ROLE_ORDER
     jugadores.sort(key=lambda x: ROLE_ORDER.index(x["role"]) if x["role"] in ROLE_ORDER else 99)

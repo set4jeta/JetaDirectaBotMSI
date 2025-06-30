@@ -494,7 +494,7 @@ async def help_command(ctx):
         "`!help` - Muestra esta ayuda\n"
         "`!setchannel` - Configura este canal para notificaciones automáticas(solo admin)\n"
         "`!<equipo>` - Muestra los jugadores de un equipo (ej: `!g2`)\n"
-        "`!live` - Muestra los jugadores MSI actualmente en partida\n"
+        "`!live` - Muestra los jugadores MSI actualmente en partida (OJO puede tardar un poco)\n"
         "`!<nombrejugador>` - Muestra la partida activa de un jugador (ej: `!elk`)\n"
         "`!historial <jugador>` - Muestra las últimas partidas de un jugador MSI\n"
         "`!ranking` - Muestra la tabla de clasificación actual de los jugadores MSI\n"
@@ -519,6 +519,9 @@ async def live(ctx):
     """
     import time
     from datetime import datetime, timezone
+    
+     # Envía mensaje inicial para feedback al usuario
+    loading_msg = await ctx.send("⏳ Calculando datos, por favor espera...")
 
     #print("\n[!LIVE] ===== INICIO DE COMANDO !LIVE =====")
     start_total = time.time()
@@ -633,12 +636,15 @@ async def live(ctx):
 
     print(f"\n[!LIVE] ===== FIN DE COMANDO !LIVE ===== (t_total={time.time()-start_total:.2f}s)\n")
 
+    
     if not vivos:
-        await ctx.send("No hay jugadores MSI en partida en este momento.\n*(Algunas partidas pueden no estar actualizadas del todo, para más consistencia usa !<jugador>)*")
+        final_msg = "No hay jugadores MSI en partida en este momento.\n*(Algunas partidas pueden no estar actualizadas del todo, para más consistencia usa !<jugador>)*"
     else:
-        msg = "**Jugadores MSI en partida ahora mismo:** (*Últimos 15 min aprox*)\n\n" + "\n".join(vivos)
-        msg += "\n\n*(Algunas partidas pueden no estar actualizadas del todo, para más consistencia usa !<jugador>)*"
-        await ctx.send(msg)
+        final_msg = "**Jugadores MSI en partida ahora mismo:** (*Últimos 15 min aprox*)\n\n" + "\n".join(vivos)
+        final_msg += "\n\n*(Algunas partidas pueden no estar actualizadas del todo, para más consistencia usa !<jugador>)*"
+
+    # Edita el mensaje inicial con el resultado final
+    await loading_msg.edit(content=final_msg)
         
         
 @bot.command()
