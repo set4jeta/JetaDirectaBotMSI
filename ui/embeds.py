@@ -430,17 +430,17 @@ async def create_match_embed(active_game: dict, mostrar_tiempo: bool = True, mos
             value="Descarga y ejecuta el archivo **spectate_lol.bat** adjunto arriba para espectar la partida desde tu cliente. (Debes tener el cliente de LoL cerrado)",
             inline=False
         )
-        embed.add_field(
-            name="⚠️ Advertencia importante",
-            value=(
-                    "Al ejecutar el archivo **spectate_lol.bat**, se reiniciará Riot Vanguard (anticheat). "
-                    "Para volver a jugar partidas normales de LoL o Valorant, "
-                    "**reinicia tu PC antes de abrir el cliente**.\n\n"
-                    "Si solo quieres espectar, no hay problema."
-                    "(OJO, sólo sirve para partidas que estén en vivo, partida terminada sólo mostrará el minuto final o nada)" 
-            ),
-            inline=False
-        )
+       # embed.add_field(
+       #     name="⚠️ Advertencia importante",
+      #      value=(
+      #              "Al ejecutar el archivo **spectate_lol.bat**, se reiniciará Riot Vanguard (anticheat). "
+      #              "Para volver a jugar partidas normales de LoL o Valorant, "
+      #              "**reinicia tu PC antes de abrir el cliente**.\n\n"
+      #              "Si solo quieres espectar, no hay problema."
+      #              "(OJO, sólo sirve para partidas que estén en vivo, partida terminada sólo mostrará el minuto final o nada)" 
+      #      ),
+       #     inline=False
+     #   )
     else:
         embed.add_field(
             name="🔗 Espectar en directo",

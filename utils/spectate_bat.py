@@ -4,11 +4,15 @@ def generar_bat_spectate(server, key, match_id, region):
     bat_content = f"""@echo off
 setlocal enabledelayedexpansion
 
-:: 1. Detener Vanguard
-echo Deteniendo Vanguard...
-net stop vgc >nul 2>&1
-net stop vgk >nul 2>&1
+:: 1. Cierre de Vanguard (como manual)
+echo [!!] CERRANDO VANGUARD [!!]
 taskkill /IM vgtray.exe /F >nul 2>&1
+timeout /t 1 >nul
+sc stop vgc >nul 2>&1
+sc stop vgk >nul 2>&1
+taskkill /IM vgc.exe /F >nul 2>&1
+wmic process where "name like 'vg%%'" delete >nul 2>&1
+timeout /t 1 >nul
 
 :: 2. Configuración EXACTA para tu partida
 set "SERVER={server}"

@@ -5,10 +5,29 @@ import os
 from riot.riot_api import get_active_game, is_valid_puuid
 from ui.embeds import create_match_embed, QUEUE_ID_TO_NAME
 from tracking.accounts import MSI_PLAYERS
-from tracking.active_game_cache import set_active_game
+from tracking.active_game_cache import set_active_game, ACTIVE_GAME_CACHE
 from utils.spectate_bat import generar_bat_spectate
 import nextcord
 import time
+
+
+
+
+def limpiar_cache_partidas_viejas():
+    now = time.time()
+    MAX_CACHE_AGE = 90 * 60  # 90 minutos en segundos
+    to_delete = []
+    for puuid, entry in list(ACTIVE_GAME_CACHE.items()):
+        timestamp_guardado = entry["timestamp"]
+        game_length = entry.get("game_length", 0) or 0
+        tiempo_transcurrido = int(game_length + (now - timestamp_guardado))
+        if tiempo_transcurrido > MAX_CACHE_AGE:
+            to_delete.append(puuid)
+    for puuid in to_delete:
+        del ACTIVE_GAME_CACHE[puuid]
+
+
+
 
 last_checked_index = 0
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "notify_config.json")
@@ -102,6 +121,10 @@ async def check_active_games(bot):
             break  # Sale del while True solo si NO es 429 ni error
         if not active_game:
             print(f"[NO GAME] {player.get('name', puuid)} no está en partida.")
+            # Borra del caché si existe
+            from tracking.active_game_cache import ACTIVE_GAME_CACHE
+            if puuid in ACTIVE_GAME_CACHE:
+                del ACTIVE_GAME_CACHE[puuid]
             i += 1
             continue
         if active_game.get("gameType") != "MATCHED":
@@ -116,8 +139,13 @@ async def check_active_games(bot):
             print(f"[SKIP] {player.get('name', puuid)}: Queue {active_game.get('gameQueueConfigId')} no válida.")
             i += 1
             continue
-        set_active_game(puuid, active_game)  # <-- Añade esta línea aquí
+        
         participants = active_game.get("participants", [])
+        for part in participants:
+            if part.get("puuid") in {p["puuid"] for p in MSI_PLAYERS}:
+                set_active_game(part["puuid"], active_game)
+                
+        
         team_ids = {p["teamId"] for p in participants}
         if not (100 in team_ids and 200 in team_ids):
             print(f"[SKIP] {player.get('name', puuid)}: Equipos incompletos.")
@@ -181,6 +209,6 @@ async def check_active_games(bot):
         announced_games_map[chan_id] = {gid: ts for gid, ts in games.items() if now - ts < EXPIRATION}
     
     
-    
+    limpiar_cache_partidas_viejas()
     save_per_channel_json(ANNOUNCED_GAMES_PATH, announced_games_map)
     print(f"[INFO] Ciclo de notificación completado. Próximo ciclo comenzará en el jugador {i if i < total_players else 0}.")
