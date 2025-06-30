@@ -1,6 +1,6 @@
 # 🧠 MSI Tracker Bot
 
-Bot de Discord para **trackear en tiempo real las partidas de jugadores profesionales** de League of Legends (MSI Verison). Muestra información detallada de cada partida, permite espectarlas fácilmente desde el cliente y ofrece comandos útiles para la comunidad.
+Bot de Discord para **trackear en tiempo real las partidas de jugadores profesionales** de League of Legends (MSI Versión). Muestra información detallada de cada partida, permite espectarlas fácilmente desde el cliente y ofrece comandos útiles para la comunidad.
 
 ---
 
