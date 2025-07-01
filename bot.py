@@ -9,6 +9,7 @@ from tracking.accounts import MSI_PLAYERS, reload_msi_players
 from tracking.update_accounts_from_leaderboard import fetch_leaderboard
 from riot.riot_api import get_ranked_data, get_active_game, get_puuid_from_riot_id, get_is_live_and_updated_from_dpmlol, get_puuid_from_dpmlol, get_match_history_from_dpmlol, get_dpmlol_puuid
 from ui.embeds import create_match_embed, get_player_display, get_champion_name_by_id
+from ui.embeds import TEAM_TRICODES 
 import time
 import asyncio
 import subprocess
@@ -166,6 +167,7 @@ def add_team_commands(bot):
     teams = get_teams()
     for team in teams:
         async def team_cmd(ctx, team=team):
+            loading_msg = await ctx.send("⏳ Calculando datos, por favor espera...")
             players = [p for p in MSI_PLAYERS if p["team"].lower() == team]
             if not players:
                 await ctx.send(f"No hay jugadores para el equipo '{team.upper()}'.")
@@ -185,7 +187,8 @@ def add_team_commands(bot):
                 lines.append(
                     f"**{p['name']}** ({p['riot_id']['game_name']}#{p['riot_id']['tag_line']}) - {rank}"
                 )
-            await ctx.send(f"**Jugadores de {team.upper()}:**\n" + "\n".join(lines))
+            team_name = TEAM_TRICODES.get(team.upper(), team.upper())
+            await loading_msg.edit(content=f"**Jugadores de {team.upper()} ({team_name}):**\n\n" + "\n".join(lines))
         # Agrega el comando dinámicamente
         bot.command(name=team)(team_cmd)
 
@@ -209,16 +212,22 @@ def add_player_commands(bot):
             for intento in range(max_retries):
                 active_game, status = await get_active_game(puuid)
                 if active_game:
-                    embed, bat_path = await create_match_embed(active_game)
+                    # filepath: d:\msi_tracker_bot\bot.py
+                    embed, bat_path, files = await create_match_embed(active_game)
                     embed.title = f"Partida de {display_name}! 🎮"
+                    all_files = files.copy()
                     if bat_path:
+                        all_files.append(nextcord.File(bat_path, filename="spectate_lol.bat"))
                         await ctx.send(
-                            content=f"⬇️ Archivo para espectar la partida de {display_name}:",
+                            content="⬇️ **Archivo para espectar la partida:**",
                             embed=embed,
-                            file=nextcord.File(bat_path, filename="spectate_lol.bat")
+                            files=all_files
                         )
                     else:
-                        await ctx.send(embed=embed)
+                        if files:
+                            await ctx.send(embed=embed, files=files)
+                        else:
+                            await ctx.send(embed=embed)
                     return
                 if status == 404:
                     await ctx.send(f"❌ {display_name} no está en ninguna partida activa.")
@@ -233,7 +242,7 @@ def add_player_commands(bot):
                             tiempo_transcurrido = cache_entry["game_length"] + int(now - cache_entry["timestamp"])
                         else:
                             tiempo_transcurrido = int(now - cache_entry["timestamp"])
-                        embed, bat_path = await create_match_embed(
+                        embed, bat_path, files = await create_match_embed(
                             cache_entry["active_game"],
                             mostrar_tiempo=False,
                             mostrar_hora=True
@@ -257,8 +266,7 @@ def add_player_commands(bot):
                         add_to_retry_queue(puuid)
                         return
                     else:
-                        await ctx.send("⚠️ No se pudo consultar la partida activa por límite de peticiones de Riot y no hay datos de respaldo.")
-                        # AGREGA A LA COLA DE REINTENTO DIFERIDO IGUALMENTE
+                        await ctx.send(f"❌ {display_name} no está en ninguna partida activa.")
                         add_to_retry_queue(puuid)
                         return
                 if intento < max_retries - 1:
@@ -413,12 +421,14 @@ async def unsubscribe(ctx):
 @bot.command()
 async def historial(ctx, *, nombre: str):
     nombre = nombre.strip().lower()
+    loading_msg = await ctx.send("⏳ Calculando datos, por favor espera...")
     print(f"[HISTORIAL] Buscando jugador: '{nombre}'")
     players = [p for p in MSI_PLAYERS if p["name"].lower() == nombre]
     print(f"[HISTORIAL] Jugadores encontrados: {[p['name'] for p in players]}")
     if not players:
         await ctx.send(f"No se encontró el jugador '{nombre}'.")
         return
+    msgs = []
     for player in players:
         riot_id = player.get("riot_id", {})
         game_name = riot_id.get("game_name", "")
@@ -477,12 +487,19 @@ async def historial(ctx, *, nombre: str):
             resultado = "✅" if win else "❌"
             partidas.append(f"{resultado} **{champ}**{pos_str} {emoji} | {kills}/{deaths}/{assists} | {mins} min | 🕒 {hora_inicio_str}")
 
-        nick_str = f"{player['name']} ({game_name}#{tag_line})" if game_name and tag_line else player['name']
+        team = player.get("team", "")
+        tricode = team.upper() if team else ""
+        team_name = TEAM_TRICODES.get(tricode, team)
+        nick_str = f"{player['name']} [{tricode}] ({game_name}#{tag_line})" if game_name and tag_line else player['name']
 
         msg = f"**{nick_str}** últimas partidas:\n\n"
         for i, linea in enumerate(partidas, 1):
             msg += f"{i}. {linea}\n"
-        await ctx.send(msg)
+        msgs.append(msg)
+    if msgs:
+        await loading_msg.edit(content="\n\n".join(msgs))
+    else:
+        await loading_msg.edit(content="No se encontró historial para ese jugador.")        
 
 
 
@@ -533,41 +550,57 @@ async def live(ctx):
     MAX_DPM_AGE = 10 * 60     # 10 minutos en segundos
 
     for idx, player in enumerate(MSI_PLAYERS):
-        #print(f"\n[!LIVE] Procesando jugador {idx+1}/{len(MSI_PLAYERS)}: {player['name']}")
+        print(f"\n[!LIVE] Procesando jugador {idx+1}/{len(MSI_PLAYERS)}: {player['name']}")
         puuid = player.get("puuid")
         display_name = player["name"]
         riot_id = player.get("riot_id", {})
         game_name = riot_id.get("game_name", "")
         tag_line = riot_id.get("tag_line", "")
         if not puuid or not game_name or not tag_line:
-            #print(f"[!LIVE]  -> Saltando: Faltan datos (puuid/game_name/tag_line)")
+            print(f"[!LIVE]  -> Saltando: Faltan datos (puuid/game_name/tag_line)")
             continue
 
         updated_at_str = None
         cache_entry = ACTIVE_GAME_CACHE.get(puuid)
+        # Carga el tiempo de la última notificación de la partida (por gameId)
+        last_notified_ts = None
+        game_id = None
+        if cache_entry and "active_game" in cache_entry:
+            game_id = cache_entry["active_game"].get("gameId")
+            # Carga el announced_games.json
+            import json, os
+            announced_path = os.path.join(os.path.dirname(__file__), "tracking", "announced_games.json")
+            if os.path.exists(announced_path) and game_id:
+                with open(announced_path, "r", encoding="utf-8") as f:
+                    announced_data = json.load(f)
+                    # Busca el timestamp más reciente en cualquier canal
+                    for chan_games in announced_data.values():
+                        if str(game_id) in chan_games:
+                            ts = chan_games[str(game_id)]
+                            if not last_notified_ts or ts > last_notified_ts:
+                                last_notified_ts = ts
         cache_ok = False
         active_game = None
 
         if cache_entry and "active_game" in cache_entry:
             timestamp_guardado = cache_entry.get("timestamp", 0)
-            game_length = cache_entry.get("game_length", 0) or 0
-            tiempo_transcurrido = int(game_length + (now - timestamp_guardado))
-            #print(f"[!LIVE]  -> Hay caché para {display_name}. Tiempo transcurrido: {tiempo_transcurrido}s")
-            if tiempo_transcurrido < MAX_CACHE_AGE:
+            edad_cache = now - timestamp_guardado
+            print(f"[!LIVE]  -> Hay caché para {display_name}. Edad del caché: {edad_cache:.1f}s")
+            if edad_cache < MAX_CACHE_AGE:
                 # Si el caché es reciente (<5min), úsalo directamente
                 cache_ok = True
                 active_game = cache_entry["active_game"]
-                #print(f"[!LIVE]  -> Usando caché reciente (<5min)")
+                print(f"[!LIVE]  -> Usando caché reciente (<5min)")
             else:
                 print(f"[!LIVE]  -> Caché viejo (>5min), se intentará API/dpm.lol")
 
         # Si el caché es viejo, consulta la API de Riot hasta 2 veces
         if not cache_ok and cache_entry and "active_game" in cache_entry:
             for intento in range(2):
-               # print(f"[!LIVE]  -> Intento {intento+1} de API Riot para {display_name}")
+                print(f"[!LIVE]  -> Intento {intento+1} de API Riot para {display_name}")
                 t0 = time.time()
                 active_game, status = await get_active_game(puuid)
-                #print(f"[!LIVE]    -> API status: {status}, t={time.time()-t0:.2f}s")
+                print(f"[!LIVE]    -> API status: {status}, t={time.time()-t0:.2f}s")
                 if status == 200 and active_game:
                     from tracking.active_game_cache import set_active_game
                     set_active_game(puuid, active_game)
@@ -584,16 +617,16 @@ async def live(ctx):
                     break
             # Si sigue sin datos frescos, consulta dpm.lol
             if not cache_ok:
-               # print(f"[!LIVE]  -> Consultando dpm.lol para {display_name}")
+                print(f"[!LIVE]  -> Consultando dpm.lol para {display_name}")
                 t1 = time.time()
                 is_live, updated_at = await get_is_live_and_updated_from_dpmlol(game_name, tag_line)
-               # print(f"[!LIVE]    -> dpm.lol isLive={is_live}, updated_at={updated_at}, t={time.time()-t1:.2f}s")
+                print(f"[!LIVE]    -> dpm.lol isLive={is_live}, updated_at={updated_at}, t={time.time()-t1:.2f}s")
                 updated_at_str = updated_at  # Guarda el string ISO para mostrarlo después
                 if is_live and updated_at:
                     try:
                         dt_updated = datetime.fromisoformat(updated_at.replace("Z", "+00:00"))
                         age = (datetime.now(timezone.utc) - dt_updated).total_seconds()
-                       # print(f"[!LIVE]    -> dpm.lol age={age:.1f}s")
+                        print(f"[!LIVE]    -> dpm.lol age={age:.1f}s")
                         if age < MAX_DPM_AGE:
                             active_game = cache_entry["active_game"]
                             cache_ok = True
@@ -603,7 +636,19 @@ async def live(ctx):
                     except Exception as e:
                         print(f"[!LIVE]    -> Error parseando fecha dpm.lol: {e}")
                 else:
-                    print(f"[!LIVE]    -> dpm.lol no está en partida o sin fecha")
+                    # Lógica de respaldo: si la partida fue notificada hace <5min, la mostramos igual pero con advertencia
+                    show_as_recently_ended = False
+                    if last_notified_ts and game_id:
+                        seconds_since_notify = now - last_notified_ts
+                        if seconds_since_notify < 5 * 60:
+                            show_as_recently_ended = True
+                    if show_as_recently_ended:
+                        print(f"[!LIVE]    -> dpm.lol dice que terminó, pero la partida fue notificada hace {seconds_since_notify:.0f}s. Mostrando con advertencia.")
+                        active_game = cache_entry["active_game"]
+                        cache_ok = True
+                        updated_at_str = None  # Para que abajo entre en el else y puedas poner el mensaje especial
+                    else:
+                        print(f"[!LIVE]    -> dpm.lol no está en partida o sin fecha")
 
         if not cache_ok:
             print(f"[!LIVE]  -> No hay datos válidos para {display_name}, no se muestra.")
@@ -631,8 +676,17 @@ async def live(ctx):
             print(f"[!LIVE]  -> Mostrando {display_name} (dpm.lol hora: {hora_str})")
             vivos.append(f"**{display_name}** ({champ_name}) | {tiempo_str} en partida (`!{cmd_name}` para +info) | Última actualización: {hora_str}")
         else:
+            # Si la partida fue notificada hace <5min y dpm.lol dice que terminó, muestra advertencia
+            recently_ended = False
+            if last_notified_ts and game_id:
+                seconds_since_notify = now - last_notified_ts
+                if seconds_since_notify < 5 * 60:
+                    recently_ended = True
             print(f"[!LIVE]  -> Mostrando {display_name} (solo caché/API)")
-            vivos.append(f"**{display_name}** ({champ_name}) | {tiempo_str} en partida (`!{cmd_name}` para +info)")
+            msg = f"**{display_name}** ({champ_name}) | {tiempo_str} en partida (`!{cmd_name}` para +info)"
+            if recently_ended:
+                msg += "  *(Esta partida podría haber terminado recientemente)*"
+            vivos.append(msg)
 
     print(f"\n[!LIVE] ===== FIN DE COMANDO !LIVE ===== (t_total={time.time()-start_total:.2f}s)\n")
 

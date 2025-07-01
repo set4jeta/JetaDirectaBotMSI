@@ -169,22 +169,31 @@ async def check_active_games(bot):
                 continue
             if game_id not in embed_cache:
                 try:
-                    embed, bat_path = await create_match_embed(active_game, mostrar_tiempo=False, mostrar_hora=True)
-                    embed_cache[game_id] = (embed, bat_path)
+                    embed, bat_path, files = await create_match_embed(active_game, mostrar_tiempo=False, mostrar_hora=True)
+                    embed_cache[game_id] = (embed, bat_path, files)
                 except Exception as e:
                     print(f"[ERROR] No se pudo crear embed para gameId={game_id}: {e}")
                     continue
             else:
-                embed, bat_path = embed_cache[game_id]
+                embed, bat_path, files = embed_cache[game_id]
             try:
                 if bat_path:
+                    all_files = []
+                    # Vuelve a crear los archivos de imagen para cada canal
+                    if files:
+                        for f in files:
+                            all_files.append(nextcord.File(f.fp.name, filename=f.filename))
+                    all_files.append(nextcord.File(bat_path, filename="spectate_lol.bat"))
                     await channel.send(
                         content="⬇️ **Archivo para espectar la partida:**",
                         embed=embed,
-                        file=nextcord.File(bat_path, filename="spectate_lol.bat")
+                        files=all_files
                     )
                 else:
-                    await channel.send(embed=embed)
+                    if files:
+                        await channel.send(embed=embed, files=files)
+                    else:
+                        await channel.send(embed=embed)
                 print(f"[NOTIFY] Notificación enviada a canal {channel_id} para gameId={game_id}.")
                 chan_map = announced_games_map.setdefault(str(channel_id), {})
                 chan_map[str(game_id)] = int(time.time())

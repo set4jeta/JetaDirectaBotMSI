@@ -181,3 +181,13 @@ async def get_dpmlol_puuid(game_name, tag_line):
         return None
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, fetch)
+
+
+
+
+
+def get_player_image_attachment(player_name: str) -> str:
+    return f"attachment://{player_name}.webp"
+
+def get_team_logo_attachment(tricode: str) -> str:
+    return f"attachment://{tricode}.jpg"

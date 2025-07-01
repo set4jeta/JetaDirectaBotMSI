@@ -4,7 +4,9 @@ import time
 ACTIVE_GAME_CACHE = {}
 
 def set_active_game(puuid, active_game):
+    print(f"[CACHE] Actualizando caché para {puuid} a {time.time()}")
     # Guarda también el gameLength y el timestamp de cuando se obtuvo
+    
     game_length = active_game.get("gameLength")
     ACTIVE_GAME_CACHE[puuid] = {
         "active_game": active_game,
