@@ -13,6 +13,7 @@ TEAM_TRICODES = {
     "FUR": "FURIA",
     "GAM": "GAM Esports",
     "AL": "Anyone's Legend",
+    "CGN": "CGN Esports",
 }
 
 # Carpeta destino

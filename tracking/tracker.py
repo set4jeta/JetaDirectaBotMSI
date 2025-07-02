@@ -9,22 +9,11 @@ from tracking.active_game_cache import set_active_game, ACTIVE_GAME_CACHE
 from utils.spectate_bat import generar_bat_spectate
 import nextcord
 import time
+from utils.cache_utils import limpiar_cache_partidas_viejas
 
 
 
 
-def limpiar_cache_partidas_viejas():
-    now = time.time()
-    MAX_CACHE_AGE = 90 * 60  # 90 minutos en segundos
-    to_delete = []
-    for puuid, entry in list(ACTIVE_GAME_CACHE.items()):
-        timestamp_guardado = entry["timestamp"]
-        game_length = entry.get("game_length", 0) or 0
-        tiempo_transcurrido = int(game_length + (now - timestamp_guardado))
-        if tiempo_transcurrido > MAX_CACHE_AGE:
-            to_delete.append(puuid)
-    for puuid in to_delete:
-        del ACTIVE_GAME_CACHE[puuid]
 
 
 
@@ -141,10 +130,23 @@ async def check_active_games(bot):
             continue
         
         participants = active_game.get("participants", [])
+        # ...existing code...
+        # Guarda ranked_data_map para todos los MSI en la partida
+        msi_puuids = [p["puuid"] for p in participants if p["puuid"] in {p["puuid"] for p in MSI_PLAYERS}]
+        ranked_data_map = {}
+        from riot.riot_api import get_ranked_data
+        for puuid_msi in msi_puuids:
+            try:
+                ranked_data = await get_ranked_data(puuid_msi)
+                ranked_data_map[puuid_msi] = ranked_data
+            except Exception as e:
+                ranked_data_map[puuid_msi] = None
+
+        from tracking.active_game_cache import set_active_game_with_ranked
         for part in participants:
-            if part.get("puuid") in {p["puuid"] for p in MSI_PLAYERS}:
-                set_active_game(part["puuid"], active_game)
-                
+            if part.get("puuid") in msi_puuids:
+                set_active_game_with_ranked(part["puuid"], active_game, ranked_data_map)
+        # ...existing code...
         
         team_ids = {p["teamId"] for p in participants}
         if not (100 in team_ids and 200 in team_ids):

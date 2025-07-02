@@ -6,8 +6,197 @@ from riot.riot_api import get_champion_name_by_id, get_ranked_data
 from tracking.accounts import MSI_PLAYERS
 from utils.spectate_bat import generar_bat_spectate
 from datetime import datetime, timedelta
+from riot.champion_cache import CHAMPION_ID_TO_NAME
+
 import os
 import PIL.Image
+import json
+from io import BytesIO
+from utils.constants import CHAMPION_TO_ROLES, TEAM_TRICODES, QUEUE_ID_TO_NAME, ROLE_ORDER
+from utils.helpers import parse_ranked_data
+
+
+
+
+
+
+
+
+# Carga y combina los datos de pro_players_full y pro_players_bootcamp
+FULL_PATH = os.path.join(os.path.dirname(__file__), "..", "tracking", "pro_players_full.json")
+BOOTCAMP_PATH = os.path.join(os.path.dirname(__file__), "..", "tracking", "pro_players_bootcamp.json")
+
+PRO_PLAYERS = {}
+
+def load_pro_players():
+    # Carga ambos archivos
+    full = {}
+    bootcamp = {}
+    if os.path.exists(FULL_PATH):
+        with open(FULL_PATH, "r", encoding="utf-8") as f:
+            full = json.load(f)
+    if os.path.exists(BOOTCAMP_PATH):
+        with open(BOOTCAMP_PATH, "r", encoding="utf-8") as f:
+            bootcamp = json.load(f)
+    # Combina: bootcamp sobrescribe full si hay duplicados
+    combined = {**full, **bootcamp}
+    # Si hay duplicados, combina los datos (bootcamp > full)
+    for k in set(full) & set(bootcamp):
+        combined[k] = {**full[k], **bootcamp[k]}
+    return combined
+
+PRO_PLAYERS = load_pro_players()
+
+
+
+def buscar_pro_player(nombre: str):
+    nombre = nombre.strip().lower()
+    for k, v in PRO_PLAYERS.items():
+        if k.lower() == nombre:
+            return v
+        if v.get("name", "").lower() == nombre:
+            return v
+        if v.get("name_real", "").lower() == nombre:
+            return v
+        # Busca en cuentas NA
+        for acc in v.get("cuentas_na", []):
+            if acc.lower() == nombre:
+                return v
+    return None
+
+
+
+
+async def crear_info_embed(jugador):
+    import nextcord
+    from scripts.player_image_gen import get_player_image
+    from scripts.team_logo_gen import get_team_logo_image
+
+    # --- Datos principales ---
+    name = jugador.get("name", "Desconocido")
+    name_real = jugador.get("name_real", "")
+    team_name = jugador.get("team_name", "")
+    flag = jugador.get("home_region", "")
+    position = jugador.get("position", "")
+    highest_rank = jugador.get("rankHigh", "")
+    highest_rank_num = jugador.get("highest_rank", "")
+    pro_level = jugador.get("pro_level", "")
+    birthday = jugador.get("birthday", "")
+    home_region = jugador.get("home_region", "")
+    current_region = jugador.get("current_region", "")
+    twitch_url = jugador.get("twitch_url", "")
+    twitch_name = jugador.get("twitch_name", "")
+    twitter_url = jugador.get("twitter_url", "")
+    twitter_name = jugador.get("twitter_name", "")
+    img_url = jugador.get("img_url", "")
+    contracted = jugador.get("contracted", "")
+    on_stream = jugador.get("onStream", False)
+    cuentas_na = jugador.get("cuentas_na", [])
+    if isinstance(cuentas_na, str):
+        cuentas_na = [cuentas_na]
+    cuentas_na_list = "\n".join(f"- {c}" for c in cuentas_na) if cuentas_na else "Sin cuentas NA registradas."
+
+    # Campeones destacados
+    champ_lines = []
+    for i in range(1, 4):
+        champ_id = jugador.get(f"champ_{i}")
+        champ_per = jugador.get(f"champ_{i}_per")
+        if champ_id:
+            champ_name = CHAMPION_ID_TO_NAME.get(str(champ_id), f"ID {champ_id}")
+            champ_lines.append(f"- {champ_name} ({champ_per}%)")
+    if not champ_lines:
+        champ_lines = ["Sin datos de campeones destacados."]
+
+    # Equipo
+    if team_name:
+        team_line = f"{flag} {position} actualmente en {team_name}"
+    else:
+        team_line = "🕊️ Actualmente sin equipo competitivo"
+
+    # Redes
+    redes = []
+    if twitch_url and twitch_name:
+        redes.append(f"🔗 Twitch: [{twitch_name}]({twitch_url})")
+    if twitter_url and twitter_name:
+        redes.append(f"🔗 Twitter: [@{twitter_name}]({twitter_url})")
+    if not redes:
+        redes = ["🙅 Sin redes públicas conocidas."]
+
+    contrato = f"📄 Contratado desde: {contracted}" if contracted else ""
+    stream = "🟢 EN STREAM AHORA" if on_stream else ""
+
+    # --- Construye el embed ---
+    embed = nextcord.Embed(
+        title=f"{name} ({name_real})",
+        description=team_line,
+        color=nextcord.Color.blue()
+    )
+    embed.add_field(name="🎖️ Máximo rango", value=highest_rank or "?", inline=True)
+    embed.add_field(name="📊 Ranking global", value=f"#{highest_rank_num}" if highest_rank_num else "?", inline=True)
+    embed.add_field(name="🎮 Nivel profesional", value=pro_level or "?", inline=True)
+    embed.add_field(name="🎂 Nacimiento", value=birthday or "?", inline=True)
+    value_region = f"{home_region} ➝ {current_region}" if home_region != current_region else home_region
+    embed.add_field(name="🌍 Región", value=value_region, inline=True)
+    embed.add_field(name="🧑‍💼 Nombre real", value=name_real or "?", inline=True)
+    embed.add_field(name="Redes", value="\n".join(redes), inline=False)
+    embed.add_field(name="🔥 Campeones destacados", value="\n".join(champ_lines), inline=False)
+    embed.add_field(name="🧾 Cuentas en NA", value=cuentas_na_list, inline=False)
+    if contrato:
+        embed.add_field(name="Contrato", value=contrato, inline=False)
+    if stream:
+        embed.add_field(name="Stream", value=stream, inline=False)
+
+    # --- Imágenes ---
+    files = []
+    # Thumbnail: imagen del jugador
+   
+    # ...en crear_info_embed, reemplaza el bloque de obtención de imagen de jugador por esto:
+
+    player_img = None
+
+    if name and img_url:
+        filename = f"{name.lower().replace(' ', '_')}.png"
+        player_img_path = os.path.join("assets", "player_images", filename)
+
+        if os.path.exists(player_img_path):
+            try:
+                with open(player_img_path, "rb") as f:
+                    player_img = BytesIO(f.read())
+            except Exception as e:
+                print(f"[✗] Error leyendo imagen local '{player_img_path}': {e}")
+                player_img = None
+
+        # Si no existe localmente o falló al abrirla, intenta descargarla
+        if player_img is None:
+            player_img = get_player_image(name, img_url)
+
+    if player_img:
+        files.append(nextcord.File(player_img, filename="player.png"))
+        embed.set_thumbnail(url="attachment://player.png")
+
+    # Imagen principal: logo del equipo
+    team_logo = None
+    if team_name:
+        team_logo = get_team_logo_image(team_name)
+    if team_logo:
+        files.append(nextcord.File(team_logo, filename="team_logo.png"))
+        embed.set_image(url="attachment://team_logo.png")
+
+    return embed, files
+
+
+
+
+
+# Carga el diccionario de cuentas de pros NA
+PRO_ACCOUNTS_PATH = os.path.join(os.path.dirname(__file__), "..", "tracking", "pro_player_accounts.json")
+PRO_ACCOUNT_TO_NAME = {}
+if os.path.exists(PRO_ACCOUNTS_PATH):
+    with open(PRO_ACCOUNTS_PATH, "r", encoding="utf-8") as f:
+        pro_accounts = json.load(f)
+        for pro_name, accounts in pro_accounts.items():
+            for acc in accounts:
+                PRO_ACCOUNT_TO_NAME[acc.lower()] = pro_name
 
 
 
@@ -56,18 +245,6 @@ async def get_rank_str(puuid: str) -> str:
         return "Sin datos de ranked"
 
 
-TEAM_TRICODES = {
-    "FLY": "FlyQuest",
-    "G2": "G2 Esports",
-    "CFO": "CTBC Flying Oyster",
-    "BLG": "Bilibili Gaming",
-    "GENG": "Gen.G",
-    "T1": "T1",
-    "MKOI": "MOVISTAR KOI",
-    "FUR": "FURIA",
-    "GAM": "GAM Esports",
-    "AL": "Anyone's Legend",
-}
 
 
 
@@ -75,195 +252,6 @@ TEAM_TRICODES = {
 
 
 
-QUEUE_ID_TO_NAME: dict[int, str] = {
-    400: "Normal Draft",
-    420: "Clasificatoria Solo/Duo",
-    430: "Normal Blind",
-    440: "Clasificatoria Flex",
-    450: "ARAM",
-    700: "Clash",
-    900: "URF",
-    1700: "Arena",
-    1300: "Nexus Blitz",
-    1090: "TFT Normal",
-    1100: "TFT Ranked",
-    0: "Personalizada",
-    830: "Tutorial",
-    840: "Bots",
-}
-
-
-
-
-ROLE_ORDER = ["TOP", "JUNGLE", "MID", "ADC", "SUPPORT"]
-
-CHAMPION_TO_ROLES = {
-    "Aatrox": ["TOP"],
-    "Ahri": ["MID"],
-    "Akali": ["TOP", "MID"],
-    "Akshan": ["MID", "ADC"],
-    "Alistar": ["SUPPORT"],
-    "Amumu": ["JUNGLE"],
-    "Anivia": ["MID"],
-    "Annie": ["MID", "SUPPORT"],
-    "Aphelios": ["ADC"],
-    "Ashe": ["ADC"],
-    "Aurelion Sol": ["MID"],
-    "Aurora": ["TOP", "MID"],
-    "Azir": ["MID"],
-    "Bard": ["SUPPORT"],
-    "Bel'Veth": ["JUNGLE"],
-    "Blitzcrank": ["SUPPORT"],
-    "Brand": ["MID", "SUPPORT", "JUNGLE"],
-    "Braum": ["SUPPORT", "TOP"],
-    "Briar": ["JUNGLE", "TOP"],
-    "Caitlyn": ["ADC"],
-    "Camille": ["TOP"],
-    "Cassiopeia": ["MID"],
-    "Cho'Gath": ["TOP", "MID"],
-    "Corki": ["MID", "ADC"],
-    "Darius": ["TOP"],
-    "Diana": ["MID", "JUNGLE"],
-    "Dr. Mundo": ["TOP", "JUNGLE"],
-    "Draven": ["ADC"],
-    "Ekko": ["JUNGLE", "MID"],
-    "Elise": ["JUNGLE"],
-    "Evelynn": ["JUNGLE"],
-    "Ezreal": ["ADC"],
-    "Fiddlesticks": ["JUNGLE", "SUPPORT", "MID"],
-    "Fiora": ["TOP"],
-    "Fizz": ["MID", "TOP"],
-    "Galio": ["MID", "SUPPORT", "TOP"],
-    "Gangplank": ["TOP", "MID"],
-    "Garen": ["TOP"],
-    "Gnar": ["TOP"],
-    "Gragas": ["TOP", "JUNGLE", "MID"], 
-    "Graves": ["JUNGLE"],
-    "Gwen": ["TOP"],
-    "Hecarim": ["JUNGLE"],
-    "Heimerdinger": ["MID", "TOP", "SUPPORT"],
-    "Hwei": ["MID", "ADC"],  # flex pending clarificación
-    "Illaoi": ["TOP"],
-    "Irelia": ["TOP", "MID"],
-    "Ivern": ["JUNGLE"],
-    "Janna": ["SUPPORT"],
-    "Jarvan IV": ["JUNGLE", "TOP"],
-    "Jax": ["TOP", "JUNGLE"],
-    "Jayce": ["TOP", "MID", "ADC"],
-    "Jhin": ["ADC"],
-    "Jinx": ["ADC"],
-    "Kai'Sa": ["ADC"],
-    "Kalista": ["ADC"],
-    "Karma": [ "SUPPORT","TOP", "MID" ],
-    "Karthus": ["JUNGLE", "MID"],
-    "Kassadin": ["MID"],
-    "Katarina": ["MID"],
-    "Kayle": ["TOP", "MID"],
-    "Kayn": ["JUNGLE"],
-    "K'Sante": ["TOP"],
-    "Kennen": ["TOP", "MID"],
-    "Kha'Zix": ["JUNGLE"],
-    "Kindred": ["JUNGLE"],
-    "Kled": ["TOP"],
-    "Kog'Maw": ["ADC"],
-    "Leblanc": ["MID"],
-    "Lee Sin": ["JUNGLE"],
-    "Leona": ["SUPPORT"],
-    "Lillia": ["JUNGLE"],
-    "Lissandra": ["MID"],
-    "Lucian": ["ADC"],
-    "Lulu": ["SUPPORT"],
-    "Lux": ["MID", "SUPPORT"],
-    "Malphite": ["TOP", "JUNGLE"],
-    "Malzahar": ["MID"],
-    "Maokai": [ "JUNGLE", "TOP", "SUPPORT" ],
-    "Master Yi": ["JUNGLE"],
-    "Mel": ["MID", "SUPPORT"],  # champion #170, pero posterior a Ambessa :contentReference[oaicite:1]{index=1}
-    "Milio": ["SUPPORT"],
-    "Miss Fortune": ["ADC"],
-    "Mordekaiser": ["TOP", "MID"],
-    "Morgana": ["SUPPORT", "MID"],
-    "Naafiri": ["JUNGLE"],
-    "Nami": ["SUPPORT"],
-    "Nasus": ["TOP"],
-    "Nautilus": ["SUPPORT", "TOP"],
-    "Neeko": [ "SUPPORT", "TOP", "MID" ],
-    "Nilah": ["ADC"],
-    "Nocturne": ["JUNGLE"],
-    "Nunu & Willump": ["JUNGLE", "MID", "SUPPORT"],
-    "Olaf": ["JUNGLE", "TOP"],
-    "Orianna": ["MID"],
-    "Ornn": ["TOP"],
-    "Pantheon": ["JUNGLE", "TOP", "MID"],
-    "Poppy": ["TOP", "JUNGLE", "SUPPORT"],
-    "Pyke": ["SUPPORT", "JUNGLE"],
-    "Qiyana": ["MID"],
-    "Quinn": ["TOP"],
-    "Rakan": ["SUPPORT"],
-    "Rammus": ["JUNGLE"],
-    "Renekton": ["TOP"],
-    "Rell": ["SUPPORT", "TOP"],
-    "Rengar": ["JUNGLE", "ADC"],
-    "Riven": ["TOP"],
-    "Rumble": ["TOP", "JUNGLE", "MID"],
-    "Ryze": ["MID" , "TOP"],
-    "Samira": ["ADC"],
-    "Sejuani": ["JUNGLE"],
-    "Senna": ["SUPPORT", "ADC"],
-    "Seraphine": ["SUPPORT", "ADC", "MID"],
-    "Sett": ["TOP", "JUNGLE"],
-    "Shaco": ["JUNGLE"],
-    "Shen": ["TOP", "SUPPORT"],
-    "Shyvana": ["JUNGLE", "TOP"],
-    "Singed": ["TOP"],
-    "Sion": ["TOP"],
-    "Sivir": ["ADC"],
-    "Skarner": ["JUNGLE"],
-    "Smolder": ["ADC", "MID"],
-    "Sona": ["SUPPORT"],
-    "Soraka": ["SUPPORT"],
-    "Swain": ["SUPPORT", "MID", "TOP"],
-    "Sylas": ["MID", "JUNGLE"],
-    "Syndra": ["MID"],
-    "Tahm Kench": ["SUPPORT", "TOP"],
-    "Taliyah": ["MID", "JUNGLE"],
-    "Talon": ["MID"],
-    "Taric": ["SUPPORT", "TOP"],
-    "Teemo": ["TOP", "JUNGLE", "MID"],
-    "Thresh": ["SUPPORT"],
-    "Tristana": ["ADC", "MID"],
-    "Trundle": ["TOP", "JUNGLE"],
-    "Tryndamere": ["TOP"],
-    "Twisted Fate": ["MID", "JUNGLE"],
-    "Twitch": ["ADC"],
-    "Udyr": ["JUNGLE"],
-    "Urgot": ["TOP"],
-    "Varus": ["ADC"],
-    "Vayne": ["ADC", "TOP"],
-    "Veigar": ["MID", "SUPPORT"],
-    "Vex": ["MID", "SUPPORT"],
-    "Vi": ["JUNGLE", "TOP"],
-    "Viego": ["JUNGLE"],
-    "Viktor": ["MID"],
-    "Vladimir": ["TOP", "MID"],
-    "Volibear": ["JUNGLE", "TOP"],
-    "Warwick": ["JUNGLE", "TOP"],
-    "Wukong": ["TOP", "JUNGLE"],
-    "Xayah": ["ADC"],
-    "Xerath": ["MID"],
-    "Xin Zhao": ["JUNGLE"],
-    "Yasuo": ["MID", "TOP", "ADC"],
-    "Yone": ["MID", "TOP", "ADC"],
-    "Yuumi": ["SUPPORT"],
-    "Zed": ["MID", "TOP"],
-    "Zeri": ["ADC"],
-    "Ziggs": ["MID"],
-    "Zilean": ["SUPPORT", "MID", "TOP"],
-    "Zoe": ["MID"],
-    "Zyra": ["JUNGLE", "SUPPORT"],
-    
-    "Ambessa": ["TOP", "JUNGLE", "MID"],  # flex alta :contentReference[oaicite:2]{index=2}
-}
 
 
 def get_possible_roles(champ_name, spell1, spell2):
@@ -283,7 +271,12 @@ async def ordenar_equipo_por_rol(participants, team_id):
             if player:
                 display = f"**{player['name']} ({riot_id})**"
             else:
-                display = riot_id
+                # Si no es MSI, revisa si está en PRO_ACCOUNT_TO_NAME
+                pro_name = PRO_ACCOUNT_TO_NAME.get(riot_id.lower())
+                if pro_name:
+                    display = f"({pro_name}) {riot_id}"
+                else:
+                    display = riot_id
             roles = get_possible_roles(champ_name, p["spell1Id"], p["spell2Id"])
             jugadores.append({
                 "champ_name": champ_name,
@@ -328,7 +321,7 @@ async def ordenar_equipo_por_rol(participants, team_id):
 
 
 
-async def create_match_embed(active_game: dict, mostrar_tiempo: bool = True, mostrar_hora: bool = True) -> tuple[nextcord.Embed, Optional[str], list]:
+async def create_match_embed(active_game: dict, mostrar_tiempo: bool = True, mostrar_hora: bool = True, ranked_data_map: dict = None) -> tuple[nextcord.Embed, Optional[str], list]: # type: ignore
     participants = active_game["participants"]
     
     #print("=== PARTICIPANTS DEBUG ===")
@@ -461,7 +454,13 @@ async def create_match_embed(active_game: dict, mostrar_tiempo: bool = True, mos
         # Recorta si es muy largo
         if len(display) > 22: #22
             display = display[:19] + "..."
-        rank_str = await get_rank_str(puuid)
+        # ...existing code...
+        if ranked_data_map and puuid in ranked_data_map:
+            ranked_data = ranked_data_map[puuid]
+            rank_str = parse_ranked_data(ranked_data)
+        else:
+            rank_str = await get_rank_str(puuid)
+        # ...existing code...
         champion_row.append(champ_name)
         account_row.append(display)
         rank_row.append(rank_str)
@@ -535,6 +534,21 @@ async def create_match_embed(active_game: dict, mostrar_tiempo: bool = True, mos
             value="Descarga y ejecuta el archivo **spectate_lol.bat** adjunto arriba para espectar la partida desde tu cliente. (Debes tener el cliente de LoL cerrado)",
             inline=False
         )
+        
+        
+        embed.add_field(
+            name="!info <nombre jugador>",
+            value="Puedes usar este comando para obtener información adicional sobre un jugador de la partida que su Nick sea visible.",
+            inline=False
+        )
+      
+      
+      
+      
+      
+      
+      
+      
        # embed.add_field(
        #     name="⚠️ Advertencia importante",
       #      value=(
@@ -566,7 +580,9 @@ async def create_match_embed(active_game: dict, mostrar_tiempo: bool = True, mos
         tricode = team.upper() if team else ""
 
         # Rutas locales
+        print(f"[EMBED IMG] Player: {player_name}, Team: {tricode}")
         player_img_path = os.path.join("assets", "players", f"{player_name}.webp")
+        
         team_img_path = os.path.join("assets", "teams", f"{tricode}.png")
 
         # Adjunta thumbnail solo si la imagen existe y es válida

@@ -5,6 +5,7 @@ import subprocess
 import importlib
 from config import DISCORD_TOKEN
 from keep_alive import keep_alive
+from core.bot import bot
 
 if __name__ == "__main__":
     # 0) Actualiza accounts.py desde el endpoint externo
@@ -28,5 +29,5 @@ if __name__ == "__main__":
     # 3) Arranca el bot (importa aquí, después de recargar accounts)
     print("🚀 Iniciando bot de Discord…")
     keep_alive() # Mantiene el bot activo en Discloud
-    from bot import bot
+    
     bot.run(DISCORD_TOKEN)

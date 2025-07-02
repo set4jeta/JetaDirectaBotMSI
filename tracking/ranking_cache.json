@@ -1,5 +1,5 @@
 {
-  "timestamp": 1751340156.5464036,
+  "timestamp": 1751471536.3547013,
   "ranking": [
     {
       "name": "Bwipo",
@@ -26,7 +26,7 @@
       "team": "FLY",
       "role": "BOTTOM",
       "rank": "CHALLENGER I",
-      "lp": 1307,
+      "lp": 1325,
       "winrate": "54%",
       "kda": "3.51",
       "champs": "Alistar, Vi, Lucian"
@@ -36,9 +36,9 @@
       "team": "FLY",
       "role": "JUNGLE",
       "rank": "CHALLENGER I",
-      "lp": 1277,
-      "winrate": "54%",
-      "kda": "4.91",
+      "lp": 1311,
+      "winrate": "55%",
+      "kda": "4.95",
       "champs": "Pantheon, Jhin, Zed"
     },
     {
@@ -46,9 +46,9 @@
       "team": "FLY",
       "role": "UTILITY",
       "rank": "CHALLENGER I",
-      "lp": 1195,
-      "winrate": "53%",
-      "kda": "5.73",
+      "lp": 1247,
+      "winrate": "54%",
+      "kda": "5.75",
       "champs": "Elise, Pyke, Vel'Koz"
     },
     {
@@ -56,49 +56,49 @@
       "team": "MKOI",
       "role": "TOP",
       "rank": "MASTER I",
-      "lp": 278,
-      "winrate": "89%",
-      "kda": "7.23",
-      "champs": "Akali, Aatrox, Dr. Mundo"
-    },
-    {
-      "name": "Supa",
-      "team": "MKOI",
-      "role": "BOTTOM",
-      "rank": "MASTER I",
-      "lp": 220,
-      "winrate": "83%",
-      "kda": "5.58",
-      "champs": "Zeri, Corki, Ezreal"
+      "lp": 332,
+      "winrate": "86%",
+      "kda": "6.83",
+      "champs": "Akali, Aatrox, Irelia"
     },
     {
       "name": "Alvaro",
       "team": "MKOI",
       "role": "UTILITY",
       "rank": "MASTER I",
-      "lp": 207,
+      "lp": 303,
       "winrate": "81%",
-      "kda": "7.09",
-      "champs": "Pantheon, Pyke, Alistar"
+      "kda": "6.69",
+      "champs": "Alistar, Pantheon, Pyke"
+    },
+    {
+      "name": "Supa",
+      "team": "MKOI",
+      "role": "BOTTOM",
+      "rank": "MASTER I",
+      "lp": 289,
+      "winrate": "83%",
+      "kda": "6.04",
+      "champs": "Corki, Zeri, Aphelios"
     },
     {
       "name": "Elyoya",
       "team": "MKOI",
       "role": "JUNGLE",
       "rank": "MASTER I",
-      "lp": 189,
-      "winrate": "83%",
-      "kda": "7.01",
-      "champs": "Lee Sin, Nidalee, Zed"
+      "lp": 259,
+      "winrate": "85%",
+      "kda": "7.15",
+      "champs": "Lee Sin, Nidalee, Kindred"
     },
     {
       "name": "Jojopyun",
       "team": "MKOI",
       "role": "MIDDLE",
       "rank": "MASTER I",
-      "lp": 148,
-      "winrate": "68%",
-      "kda": "4.02",
+      "lp": 178,
+      "winrate": "69%",
+      "kda": "4.06",
       "champs": "Twisted Fate, Sylas, Galio"
     },
     {
@@ -156,10 +156,30 @@
       "team": "BLG",
       "role": "MIDDLE",
       "rank": "MASTER I",
-      "lp": 9,
-      "winrate": "75%",
-      "kda": "6.9",
-      "champs": "Twisted Fate, Lee Sin, LeBlanc"
+      "lp": 27,
+      "winrate": "72%",
+      "kda": "6.38",
+      "champs": "Azir, Twisted Fate, Lee Sin"
+    },
+    {
+      "name": "ON",
+      "team": "BLG",
+      "role": "BOTTOM",
+      "rank": "DIAMOND I",
+      "lp": 66,
+      "winrate": "84%",
+      "kda": "5.73",
+      "champs": "Lee Sin, Shen, Kai'Sa"
+    },
+    {
+      "name": "SkewMond",
+      "team": "G2",
+      "role": "JUNGLE",
+      "rank": "DIAMOND I",
+      "lp": 47,
+      "winrate": "83%",
+      "kda": "9.86",
+      "champs": "Pantheon, Nocturne, Xin Zhao"
     },
     {
       "name": "Aress",
@@ -170,6 +190,36 @@
       "winrate": "75%",
       "kda": "6.91",
       "champs": "Kai'Sa, Sylas, Twisted Fate"
+    },
+    {
+      "name": "JunJia",
+      "team": "CFO",
+      "role": "JUNGLE",
+      "rank": "DIAMOND II",
+      "lp": 52,
+      "winrate": "87%",
+      "kda": "7.98",
+      "champs": "Pantheon, Vi, Zyra"
+    },
+    {
+      "name": "BrokenBlade",
+      "team": "G2",
+      "role": "TOP",
+      "rank": "DIAMOND II",
+      "lp": 49,
+      "winrate": "66%",
+      "kda": "4.57",
+      "champs": "Ambessa, Aatrox, Renekton"
+    },
+    {
+      "name": "Gumayusi",
+      "team": "T1",
+      "role": "BOTTOM",
+      "rank": "DIAMOND II",
+      "lp": 41,
+      "winrate": "74%",
+      "kda": "4.21",
+      "champs": "Sivir, Varus, Draven"
     },
     {
       "name": "Tatu",
@@ -192,24 +242,44 @@
       "champs": "Lucian, Yasuo, Xayah"
     },
     {
-      "name": "ON",
-      "team": "BLG",
-      "role": "BOTTOM",
-      "rank": "DIAMOND III",
-      "lp": 97,
-      "winrate": "93%",
-      "kda": "6.74",
-      "champs": "Shen, Jax, Lee Sin"
-    },
-    {
       "name": "Bwipo",
       "team": "FLY",
       "role": "TOP",
-      "rank": "DIAMOND III",
-      "lp": 87,
+      "rank": "DIAMOND II",
+      "lp": 17,
       "winrate": "88%",
-      "kda": "5.13",
+      "kda": "5.08",
       "champs": "Gangplank, Ambessa, Sett"
+    },
+    {
+      "name": "Driver",
+      "team": "CFO",
+      "role": "TOP",
+      "rank": "DIAMOND III",
+      "lp": 82,
+      "winrate": "75%",
+      "kda": "5.65",
+      "champs": "Ambessa, Jax, Gangplank"
+    },
+    {
+      "name": "HongQ",
+      "team": "CFO",
+      "role": "MIDDLE",
+      "rank": "DIAMOND III",
+      "lp": 77,
+      "winrate": "91%",
+      "kda": "9.51",
+      "champs": "Twisted Fate, Corki, Viktor"
+    },
+    {
+      "name": "Labrov",
+      "team": "G2",
+      "role": "UTILITY",
+      "rank": "DIAMOND III",
+      "lp": 77,
+      "winrate": "82%",
+      "kda": "5.6",
+      "champs": "Karma, Bard, Neeko"
     },
     {
       "name": "Tutsz",
@@ -222,34 +292,44 @@
       "champs": "Twisted Fate, Jayce, Taliyah"
     },
     {
-      "name": "BrokenBlade",
+      "name": "Caps",
       "team": "G2",
+      "role": "MIDDLE",
+      "rank": "DIAMOND III",
+      "lp": 52,
+      "winrate": "87%",
+      "kda": "5.49",
+      "champs": "Ryze, Viktor, Syndra"
+    },
+    {
+      "name": "Keria",
+      "team": "T1",
+      "role": "BOTTOM",
+      "rank": "DIAMOND III",
+      "lp": 37,
+      "winrate": "82%",
+      "kda": "3.45",
+      "champs": "Twisted Fate, Gangplank, Karma"
+    },
+    {
+      "name": "Flandre",
+      "team": "AL",
       "role": "TOP",
       "rank": "DIAMOND III",
-      "lp": 75,
-      "winrate": "71%",
-      "kda": "5.18",
-      "champs": "Ambessa, Aatrox, Olaf"
+      "lp": 32,
+      "winrate": "76%",
+      "kda": "3.47",
+      "champs": "Twisted Fate, Renekton, Jayce"
     },
     {
-      "name": "JunJia",
-      "team": "CFO",
-      "role": "JUNGLE",
+      "name": "Elk",
+      "team": "BLG",
+      "role": "BOTTOM",
       "rank": "DIAMOND III",
-      "lp": 72,
-      "winrate": "91%",
-      "kda": "8.61",
-      "champs": "Pantheon, Zed, Xin Zhao"
-    },
-    {
-      "name": "SkewMond",
-      "team": "G2",
-      "role": "JUNGLE",
-      "rank": "DIAMOND III",
-      "lp": 67,
-      "winrate": "78%",
-      "kda": "8.09",
-      "champs": "Nocturne, Pantheon, Xin Zhao"
+      "lp": 24,
+      "winrate": "62%",
+      "kda": "6.21",
+      "champs": "Varus, Xayah, Sylas"
     },
     {
       "name": "Artemis",
@@ -262,24 +342,44 @@
       "champs": "Lucian, Tristana, Aphelios"
     },
     {
-      "name": "Gumayusi",
-      "team": "T1",
+      "name": "Hans Sama",
+      "team": "G2",
       "role": "BOTTOM",
       "rank": "DIAMOND III",
       "lp": 1,
-      "winrate": "71%",
-      "kda": "4.51",
-      "champs": "Kalista, Ryze, Sivir"
+      "winrate": "80%",
+      "kda": "4.78",
+      "champs": "Ezreal, Draven, Miss Fortune"
     },
     {
-      "name": "Driver",
-      "team": "CFO",
+      "name": "Doran",
+      "team": "T1",
       "role": "TOP",
+      "rank": "DIAMOND III",
+      "lp": 1,
+      "winrate": "75%",
+      "kda": "3.64",
+      "champs": "Aatrox, Lee Sin, Ambessa"
+    },
+    {
+      "name": "Beichuan",
+      "team": "BLG",
+      "role": "JUNGLE",
       "rank": "DIAMOND IV",
-      "lp": 92,
-      "winrate": "85%",
-      "kda": "6.86",
-      "champs": "Ambessa, Jax, Gangplank"
+      "lp": 95,
+      "winrate": "71%",
+      "kda": "6.62",
+      "champs": "Zed, Lee Sin, Dr. Mundo"
+    },
+    {
+      "name": "Shanks",
+      "team": "AL",
+      "role": "MIDDLE",
+      "rank": "DIAMOND IV",
+      "lp": 87,
+      "winrate": "88%",
+      "kda": "4.75",
+      "champs": "Twisted Fate, Irelia, Corki"
     },
     {
       "name": "JoJo",
@@ -290,6 +390,26 @@
       "winrate": "62%",
       "kda": "8.49",
       "champs": "Rakan, Rell, Alistar"
+    },
+    {
+      "name": "Kael",
+      "team": "AL",
+      "role": "JUNGLE",
+      "rank": "DIAMOND IV",
+      "lp": 81,
+      "winrate": "56%",
+      "kda": "4.02",
+      "champs": "Twisted Fate, Ryze, Karthus"
+    },
+    {
+      "name": "Rest",
+      "team": "CFO",
+      "role": "TOP",
+      "rank": "DIAMOND IV",
+      "lp": 67,
+      "winrate": "69%",
+      "kda": "3.85",
+      "champs": "Jax, Gangplank, Yorick"
     },
     {
       "name": "Duro",
@@ -312,44 +432,14 @@
       "champs": "Wukong, Nidalee, Poppy"
     },
     {
-      "name": "Labrov",
-      "team": "G2",
-      "role": "UTILITY",
-      "rank": "DIAMOND IV",
-      "lp": 57,
-      "winrate": "77%",
-      "kda": "5.86",
-      "champs": "Karma, Neeko, Galio"
-    },
-    {
-      "name": "Elk",
-      "team": "BLG",
+      "name": "Oner",
+      "team": "T1",
       "role": "MIDDLE",
       "rank": "DIAMOND IV",
-      "lp": 55,
-      "winrate": "64%",
-      "kda": "4.95",
-      "champs": "Xayah, Sylas, Twisted Fate"
-    },
-    {
-      "name": "HongQ",
-      "team": "CFO",
-      "role": "MIDDLE",
-      "rank": "DIAMOND IV",
-      "lp": 37,
+      "lp": 32,
       "winrate": "100%",
-      "kda": "13.4",
-      "champs": "Twisted Fate, Corki, Viktor"
-    },
-    {
-      "name": "Shanks",
-      "team": "AL",
-      "role": "MIDDLE",
-      "rank": "DIAMOND IV",
-      "lp": 37,
-      "winrate": "100%",
-      "kda": "4.33",
-      "champs": "Twisted Fate, Corki, Lee Sin"
+      "kda": "7.08",
+      "champs": "Zed"
     },
     {
       "name": "Guigo",
@@ -362,74 +452,14 @@
       "champs": "Ambessa, Aatrox, Jax"
     },
     {
-      "name": "Flandre",
-      "team": "AL",
-      "role": "TOP",
-      "rank": "DIAMOND IV",
-      "lp": 12,
-      "winrate": "89%",
-      "kda": "2.77",
-      "champs": "Aatrox, Twisted Fate, Sion"
-    },
-    {
-      "name": "Hans Sama",
-      "team": "G2",
-      "role": "BOTTOM",
-      "rank": "DIAMOND IV",
-      "lp": 10,
-      "winrate": "71%",
-      "kda": "5.17",
-      "champs": "Ezreal, Draven, Miss Fortune"
-    },
-    {
-      "name": "Caps",
-      "team": "G2",
-      "role": "MIDDLE",
-      "rank": "DIAMOND IV",
-      "lp": 7,
-      "winrate": "80%",
-      "kda": "4.28",
-      "champs": "Syndra, Olaf, Twisted Fate"
-    },
-    {
-      "name": "Kael",
-      "team": "AL",
-      "role": "MIDDLE",
-      "rank": "EMERALD I",
-      "lp": 80,
-      "winrate": "50%",
-      "kda": "3.21",
-      "champs": "Twisted Fate, Ryze, Lee Sin"
-    },
-    {
       "name": "Bin",
       "team": "BLG",
       "role": "TOP",
-      "rank": "EMERALD I",
-      "lp": 72,
-      "winrate": "62%",
-      "kda": "6.87",
+      "rank": "DIAMOND IV",
+      "lp": 2,
+      "winrate": "64%",
+      "kda": "6.56",
       "champs": "Aatrox, Rumble, Jayce"
-    },
-    {
-      "name": "Rest",
-      "team": "CFO",
-      "role": "TOP",
-      "rank": "EMERALD I",
-      "lp": 67,
-      "winrate": "70%",
-      "kda": "3.56",
-      "champs": "Jax, Jayce, Irelia"
-    },
-    {
-      "name": "Beichuan",
-      "team": "BLG",
-      "role": "JUNGLE",
-      "rank": "EMERALD I",
-      "lp": 45,
-      "winrate": "58%",
-      "kda": "5.42",
-      "champs": "Zed, Lee Sin, Taliyah"
     },
     {
       "name": "Jojopyun",
@@ -442,6 +472,16 @@
       "champs": "Aatrox, Twisted Fate, Corki"
     },
     {
+      "name": "Tarzan",
+      "team": "AL",
+      "role": "JUNGLE",
+      "rank": "EMERALD I",
+      "lp": 30,
+      "winrate": "58%",
+      "kda": "4.44",
+      "champs": "Lee Sin, Zed, Jax"
+    },
+    {
       "name": "Faker",
       "team": "T1",
       "role": "MIDDLE",
@@ -450,16 +490,6 @@
       "winrate": "83%",
       "kda": "3.17",
       "champs": "Azir, Annie, Jayce"
-    },
-    {
-      "name": "Ruler",
-      "team": "GENG",
-      "role": "BOTTOM",
-      "rank": "EMERALD I",
-      "lp": 27,
-      "winrate": "60%",
-      "kda": "3.72",
-      "champs": "Corki, Ezreal, Miss Fortune"
     },
     {
       "name": "Kiin",
@@ -472,34 +502,14 @@
       "champs": "Gangplank, Jayce, Olaf"
     },
     {
-      "name": "Doran",
-      "team": "T1",
-      "role": "TOP",
-      "rank": "EMERALD I",
-      "lp": 1,
-      "winrate": "62%",
-      "kda": "4.05",
-      "champs": "Lee Sin, Aatrox, Ambessa"
-    },
-    {
-      "name": "Tarzan",
-      "team": "AL",
-      "role": "JUNGLE",
-      "rank": "EMERALD II",
-      "lp": 50,
-      "winrate": "50%",
-      "kda": "4.56",
-      "champs": "Lee Sin, Zed, Jax"
-    },
-    {
-      "name": "Keria",
-      "team": "T1",
+      "name": "Ruler",
+      "team": "GENG",
       "role": "BOTTOM",
-      "rank": "",
-      "lp": 0,
-      "winrate": "?",
-      "kda": "2.71",
-      "champs": "Gangplank, Ezreal, Kai'Sa"
+      "rank": "EMERALD I",
+      "lp": 7,
+      "winrate": "50%",
+      "kda": "3.35",
+      "champs": "Miss Fortune, Corki, Lee Sin"
     },
     {
       "name": "Chovy",
@@ -512,23 +522,13 @@
       "champs": "Poppy, Sylas, Aurora"
     },
     {
-      "name": "Oner",
-      "team": "T1",
-      "role": "JUNGLE",
-      "rank": "",
-      "lp": 0,
-      "winrate": "?",
-      "kda": "10.93",
-      "champs": "Zed"
-    },
-    {
       "name": "Hope",
       "team": "AL",
       "role": "BOTTOM",
       "rank": "",
       "lp": 0,
       "winrate": "?",
-      "kda": "8.76",
+      "kda": "6.91",
       "champs": "Caitlyn, Ezreal, Lucian"
     },
     {

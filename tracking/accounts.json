@@ -43,8 +43,8 @@
     "rank": {
       "rank": "I",
       "tier": "CHALLENGER",
-      "leaguePoints": 1307,
-      "wins": 320,
+      "leaguePoints": 1325,
+      "wins": 321,
       "losses": 268,
       "platform": "NA1"
     },
@@ -60,8 +60,8 @@
     "rank": {
       "rank": "I",
       "tier": "CHALLENGER",
-      "leaguePoints": 1294,
-      "wins": 273,
+      "leaguePoints": 1311,
+      "wins": 274,
       "losses": 228,
       "platform": "NA1"
     },
@@ -77,29 +77,12 @@
     "rank": {
       "rank": "I",
       "tier": "CHALLENGER",
-      "leaguePoints": 1195,
-      "wins": 344,
-      "losses": 299,
+      "leaguePoints": 1247,
+      "wins": 348,
+      "losses": 300,
       "platform": "NA1"
     },
     "puuid": "lipBvs7eiBWvdhrYzVBK1kpfUwI3W-vv-Zw0aD4GC4eUqWFqdH0Wy4Qoc89cb92EsSL7j1UMoyWPKw"
-  },
-  {
-    "riot_id": {
-      "game_name": "Tukaan",
-      "tag_line": "tuknn"
-    },
-    "team": "MKOI",
-    "name": "Supa",
-    "rank": {
-      "rank": "I",
-      "tier": "MASTER",
-      "leaguePoints": 290,
-      "wins": 33,
-      "losses": 6,
-      "platform": "NA1"
-    },
-    "puuid": "qUhjUx3-vB76alRU5f98GRVTUUSCAEY9qljhhgSl7omVD29Cc_F8gw9aFAnDILPqHhJVPCfKGEoODA"
   },
   {
     "riot_id": {
@@ -111,8 +94,8 @@
     "rank": {
       "rank": "I",
       "tier": "MASTER",
-      "leaguePoints": 262,
-      "wins": 33,
+      "leaguePoints": 332,
+      "wins": 36,
       "losses": 6,
       "platform": "NA1"
     },
@@ -128,12 +111,29 @@
     "rank": {
       "rank": "I",
       "tier": "MASTER",
-      "leaguePoints": 258,
-      "wins": 33,
+      "leaguePoints": 303,
+      "wins": 35,
       "losses": 8,
       "platform": "NA1"
     },
     "puuid": "oUTItjsox6pBDm08H-EtvOncbFgXgm8cgaiwNY6XnXCX6qzMRV4iyMTxdyPMFkZikvGqU-ZZOBQBtA"
+  },
+  {
+    "riot_id": {
+      "game_name": "Tukaan",
+      "tag_line": "tuknn"
+    },
+    "team": "MKOI",
+    "name": "Supa",
+    "rank": {
+      "rank": "I",
+      "tier": "MASTER",
+      "leaguePoints": 289,
+      "wins": 34,
+      "losses": 7,
+      "platform": "NA1"
+    },
+    "puuid": "qUhjUx3-vB76alRU5f98GRVTUUSCAEY9qljhhgSl7omVD29Cc_F8gw9aFAnDILPqHhJVPCfKGEoODA"
   },
   {
     "riot_id": {
@@ -145,8 +145,8 @@
     "rank": {
       "rank": "I",
       "tier": "MASTER",
-      "leaguePoints": 189,
-      "wins": 30,
+      "leaguePoints": 259,
+      "wins": 33,
       "losses": 6,
       "platform": "NA1"
     },
@@ -264,12 +264,29 @@
     "rank": {
       "rank": "I",
       "tier": "MASTER",
-      "leaguePoints": 9,
-      "wins": 24,
-      "losses": 8,
+      "leaguePoints": 27,
+      "wins": 26,
+      "losses": 10,
       "platform": "NA1"
     },
     "puuid": "SJnbeC_rynYOpKvUDbofTopQUXi9O8mGAltweE-sL4CO5SUkKLxPh-h8lj9gHpCG69xQR7MOfhkRqA"
+  },
+  {
+    "riot_id": {
+      "game_name": "TFTChallenger",
+      "tag_line": "11111"
+    },
+    "team": "BLG",
+    "name": "ON",
+    "rank": {
+      "rank": "I",
+      "tier": "DIAMOND",
+      "leaguePoints": 66,
+      "wins": 21,
+      "losses": 4,
+      "platform": "NA1"
+    },
+    "puuid": "gOhZZqfq_lc7547DKjA9NIkJVfPzSX750gUisL2g3NB7HXo5Q4MeS-i7G6plnW2q30WeLOsEEeKhMQ"
   },
   {
     "riot_id": {
@@ -281,8 +298,8 @@
     "rank": {
       "rank": "I",
       "tier": "DIAMOND",
-      "leaguePoints": 17,
-      "wins": 19,
+      "leaguePoints": 47,
+      "wins": 20,
       "losses": 4,
       "platform": "NA1"
     },
@@ -307,6 +324,23 @@
   },
   {
     "riot_id": {
+      "game_name": "牡蠣殼以",
+      "tag_line": "123"
+    },
+    "team": "CFO",
+    "name": "JunJia",
+    "rank": {
+      "rank": "II",
+      "tier": "DIAMOND",
+      "leaguePoints": 52,
+      "wins": 13,
+      "losses": 2,
+      "platform": "NA1"
+    },
+    "puuid": "8ztvc_JOVpjCoLNZRpvi3nhhrr3nY9Buox3MExRm85gb6OBhkf6gGMcPbBQiqkD7WL-8uN4BFCPdwg"
+  },
+  {
+    "riot_id": {
       "game_name": "G2 BrokenBlade",
       "tag_line": "1819"
     },
@@ -315,12 +349,29 @@
     "rank": {
       "rank": "II",
       "tier": "DIAMOND",
-      "leaguePoints": 31,
-      "wins": 18,
-      "losses": 9,
+      "leaguePoints": 49,
+      "wins": 19,
+      "losses": 10,
       "platform": "NA1"
     },
     "puuid": "t2xhyDsUODcv99sjM5S0H0ZNda-dEBpHzTUK73RrAgZB9MkdltTdU2KT30z-Au8gNJ5AAY-k6O7RBw"
+  },
+  {
+    "riot_id": {
+      "game_name": "Beaver Tails",
+      "tag_line": "4444"
+    },
+    "team": "T1",
+    "name": "Gumayusi",
+    "rank": {
+      "rank": "II",
+      "tier": "DIAMOND",
+      "leaguePoints": 41,
+      "wins": 17,
+      "losses": 6,
+      "platform": "NA1"
+    },
+    "puuid": "cou8EMtBUD5UWZvd9NjYuzQZJbCTiFX5jjj8vOwaJwpgJfotZUuPnak1I7sWLYvHMZAun80yHUqfXg"
   },
   {
     "riot_id": {
@@ -341,23 +392,6 @@
   },
   {
     "riot_id": {
-      "game_name": "TFTChallenger",
-      "tag_line": "11111"
-    },
-    "team": "BLG",
-    "name": "ON",
-    "rank": {
-      "rank": "II",
-      "tier": "DIAMOND",
-      "leaguePoints": 17,
-      "wins": 15,
-      "losses": 2,
-      "platform": "NA1"
-    },
-    "puuid": "gOhZZqfq_lc7547DKjA9NIkJVfPzSX750gUisL2g3NB7HXo5Q4MeS-i7G6plnW2q30WeLOsEEeKhMQ"
-  },
-  {
-    "riot_id": {
       "game_name": "FURIA Ayu",
       "tag_line": "furia"
     },
@@ -375,37 +409,54 @@
   },
   {
     "riot_id": {
-      "game_name": "牡蠣殼以",
-      "tag_line": "123"
-    },
-    "team": "CFO",
-    "name": "JunJia",
-    "rank": {
-      "rank": "II",
-      "tier": "DIAMOND",
-      "leaguePoints": 2,
-      "wins": 11,
-      "losses": 1,
-      "platform": "NA1"
-    },
-    "puuid": "8ztvc_JOVpjCoLNZRpvi3nhhrr3nY9Buox3MExRm85gb6OBhkf6gGMcPbBQiqkD7WL-8uN4BFCPdwg"
-  },
-  {
-    "riot_id": {
       "game_name": "FLY Bwipo",
       "tag_line": "1810"
     },
     "team": "FLY",
     "name": "Bwipo",
     "rank": {
-      "rank": "III",
+      "rank": "II",
       "tier": "DIAMOND",
-      "leaguePoints": 87,
-      "wins": 14,
+      "leaguePoints": 17,
+      "wins": 15,
       "losses": 2,
       "platform": "NA1"
     },
     "puuid": "OR8v6lFfSuSk7St8qSk6u4rb8xbRZekbSSLW7Vc0IYorCA-jJYLmaHYk1urXC9wOfeKis3gJMfK_Bg"
+  },
+  {
+    "riot_id": {
+      "game_name": "kiwi dotcor",
+      "tag_line": "強勢回歸"
+    },
+    "team": "CFO",
+    "name": "Driver",
+    "rank": {
+      "rank": "III",
+      "tier": "DIAMOND",
+      "leaguePoints": 82,
+      "wins": 15,
+      "losses": 5,
+      "platform": "NA1"
+    },
+    "puuid": "VpqXWUOvjwQB1okI3K9795r_y9gGPYzWiW27g1h5RDgAO_R8gpWLdDWlUKWYItl5ChzsU3FtOFEQMQ"
+  },
+  {
+    "riot_id": {
+      "game_name": "YuJunJia",
+      "tag_line": "0610"
+    },
+    "team": "CFO",
+    "name": "HongQ",
+    "rank": {
+      "rank": "III",
+      "tier": "DIAMOND",
+      "leaguePoints": 77,
+      "wins": 10,
+      "losses": 1,
+      "platform": "NA1"
+    },
+    "puuid": "_WOk32ozYgdZIyPFLUB_n6TSyRl6WbFTv3WxdKW3usbwDBkopwgxi87YeRp0zqPwHZQ0QUnh36N1RQ"
   },
   {
     "riot_id": {
@@ -460,6 +511,57 @@
   },
   {
     "riot_id": {
+      "game_name": "durcjsrhl",
+      "tag_line": "1014"
+    },
+    "team": "T1",
+    "name": "Keria",
+    "rank": {
+      "rank": "III",
+      "tier": "DIAMOND",
+      "leaguePoints": 37,
+      "wins": 9,
+      "losses": 2,
+      "platform": "NA1"
+    },
+    "puuid": "rSR5EgpWFBTampvmynI1cnFWR7Q-Au6foqL61gUOoxw0wYSEXqzX3YzQDboPXcqwFp2gSoIgHoUR_Q"
+  },
+  {
+    "riot_id": {
+      "game_name": "kryst4l",
+      "tag_line": "051"
+    },
+    "team": "AL",
+    "name": "Flandre",
+    "rank": {
+      "rank": "III",
+      "tier": "DIAMOND",
+      "leaguePoints": 32,
+      "wins": 13,
+      "losses": 4,
+      "platform": "NA1"
+    },
+    "puuid": "yLgWZIF8e1JTnBq7w6HaOHJB4lpW_bEGwJBDC2la6o_mnVbsYhST5T9KVx76MP-bYBOVYCpnyPjZWg"
+  },
+  {
+    "riot_id": {
+      "game_name": "zxcasdaqwer",
+      "tag_line": "123"
+    },
+    "team": "BLG",
+    "name": "Elk",
+    "rank": {
+      "rank": "III",
+      "tier": "DIAMOND",
+      "leaguePoints": 24,
+      "wins": 10,
+      "losses": 6,
+      "platform": "NA1"
+    },
+    "puuid": "x0Buvz9Vvbh3xamYlRqLWAVDdJElxkSMHw09a02848YPRONXWFZDzvJdBToM5JI5fllqzrJF0JJWeQ"
+  },
+  {
+    "riot_id": {
       "game_name": "zxcvbnmmnbvcx",
       "tag_line": "99999"
     },
@@ -474,40 +576,6 @@
       "platform": "NA1"
     },
     "puuid": "RhjfYMzzn7TtkQ3qzcq821Z472BMOeWsUNm2bmAhYdi3OzoMCtROS6Lm3PFgAGf4wFpWANtj-m8e6w"
-  },
-  {
-    "riot_id": {
-      "game_name": "kiwi dotcor",
-      "tag_line": "強勢回歸"
-    },
-    "team": "CFO",
-    "name": "Driver",
-    "rank": {
-      "rank": "III",
-      "tier": "DIAMOND",
-      "leaguePoints": 12,
-      "wins": 12,
-      "losses": 3,
-      "platform": "NA1"
-    },
-    "puuid": "VpqXWUOvjwQB1okI3K9795r_y9gGPYzWiW27g1h5RDgAO_R8gpWLdDWlUKWYItl5ChzsU3FtOFEQMQ"
-  },
-  {
-    "riot_id": {
-      "game_name": "Beaver Tails",
-      "tag_line": "4444"
-    },
-    "team": "T1",
-    "name": "Gumayusi",
-    "rank": {
-      "rank": "III",
-      "tier": "DIAMOND",
-      "leaguePoints": 1,
-      "wins": 12,
-      "losses": 5,
-      "platform": "NA1"
-    },
-    "puuid": "cou8EMtBUD5UWZvd9NjYuzQZJbCTiFX5jjj8vOwaJwpgJfotZUuPnak1I7sWLYvHMZAun80yHUqfXg"
   },
   {
     "riot_id": {
@@ -528,6 +596,57 @@
   },
   {
     "riot_id": {
+      "game_name": "TOPTOPTOP",
+      "tag_line": "1234"
+    },
+    "team": "T1",
+    "name": "Doran",
+    "rank": {
+      "rank": "III",
+      "tier": "DIAMOND",
+      "leaguePoints": 1,
+      "wins": 12,
+      "losses": 4,
+      "platform": "NA1"
+    },
+    "puuid": "DYolfZMvP_lZvcCrqO0EewtMtYYP4qMSAAOSS5FaggYErF3Eg4IqTWzOof26iYptBcnaj3tAQf5SWA"
+  },
+  {
+    "riot_id": {
+      "game_name": "icecream",
+      "tag_line": "WTG4"
+    },
+    "team": "BLG",
+    "name": "Beichuan",
+    "rank": {
+      "rank": "IV",
+      "tier": "DIAMOND",
+      "leaguePoints": 95,
+      "wins": 12,
+      "losses": 5,
+      "platform": "NA1"
+    },
+    "puuid": "1be5uNx5l4SkrxJEisaxhNJxYAPbk32EGLGmcshnDA7bKCFsKqvlOFFMMKfO_vopgu9XBVGgThEyww"
+  },
+  {
+    "riot_id": {
+      "game_name": "almid",
+      "tag_line": "1111"
+    },
+    "team": "AL",
+    "name": "Shanks",
+    "rank": {
+      "rank": "IV",
+      "tier": "DIAMOND",
+      "leaguePoints": 87,
+      "wins": 7,
+      "losses": 1,
+      "platform": "NA1"
+    },
+    "puuid": "sca4k0tfDYTgeluBV1FzJUFAq4RFGmBIiAt2RyLtKO5irwA7QE494IiXTarpXqLIxPZv5K_tURGXtQ"
+  },
+  {
+    "riot_id": {
       "game_name": "Jojos",
       "tag_line": "Tatu"
     },
@@ -545,54 +664,37 @@
   },
   {
     "riot_id": {
-      "game_name": "zxcasdaqwer",
-      "tag_line": "123"
-    },
-    "team": "BLG",
-    "name": "Elk",
-    "rank": {
-      "rank": "IV",
-      "tier": "DIAMOND",
-      "leaguePoints": 75,
-      "wins": 8,
-      "losses": 5,
-      "platform": "NA1"
-    },
-    "puuid": "x0Buvz9Vvbh3xamYlRqLWAVDdJElxkSMHw09a02848YPRONXWFZDzvJdBToM5JI5fllqzrJF0JJWeQ"
-  },
-  {
-    "riot_id": {
-      "game_name": "kryst4l",
-      "tag_line": "051"
+      "game_name": "7 DAY",
+      "tag_line": "2025"
     },
     "team": "AL",
-    "name": "Flandre",
+    "name": "Kael",
     "rank": {
       "rank": "IV",
       "tier": "DIAMOND",
-      "leaguePoints": 72,
-      "wins": 10,
-      "losses": 1,
+      "leaguePoints": 81,
+      "wins": 9,
+      "losses": 7,
       "platform": "NA1"
     },
-    "puuid": "yLgWZIF8e1JTnBq7w6HaOHJB4lpW_bEGwJBDC2la6o_mnVbsYhST5T9KVx76MP-bYBOVYCpnyPjZWg"
+    "puuid": "kcya3uiUp2IxwgHxMiKxcoQL4CWDd5fXCeHegV6dmIVFQ6hZgngtAwe-4pVLBvLsmMhZm7qRLiJsXw"
   },
   {
     "riot_id": {
-      "game_name": "YuJunJia",
-      "tag_line": "0610"
+      "game_name": "dsfsqw",
+      "tag_line": "123"
     },
     "team": "CFO",
-    "name": "HongQ",
+    "name": "Rest",
     "rank": {
       "rank": "IV",
       "tier": "DIAMOND",
       "leaguePoints": 67,
-      "wins": 6,
-      "losses": 0,
+      "wins": 11,
+      "losses": 5,
       "platform": "NA1"
     },
-    "puuid": "_WOk32ozYgdZIyPFLUB_n6TSyRl6WbFTv3WxdKW3usbwDBkopwgxi87YeRp0zqPwHZQ0QUnh36N1RQ"
+    "puuid": "8whNxtJ6Jlx9sEIsT7G2l0wxgwOQUJB75LdGR0mR_BrRzXP0jxDNGDc-6Kpuku44GmjBhFgMfiYlxA"
   },
   {
     "riot_id": {
@@ -630,54 +732,20 @@
   },
   {
     "riot_id": {
-      "game_name": "7 DAY",
-      "tag_line": "2025"
-    },
-    "team": "AL",
-    "name": "Kael",
-    "rank": {
-      "rank": "IV",
-      "tier": "DIAMOND",
-      "leaguePoints": 31,
-      "wins": 7,
-      "losses": 6,
-      "platform": "NA1"
-    },
-    "puuid": "kcya3uiUp2IxwgHxMiKxcoQL4CWDd5fXCeHegV6dmIVFQ6hZgngtAwe-4pVLBvLsmMhZm7qRLiJsXw"
-  },
-  {
-    "riot_id": {
-      "game_name": "durcjsrhl",
-      "tag_line": "1014"
+      "game_name": "hi hello",
+      "tag_line": "12341"
     },
     "team": "T1",
-    "name": "Keria",
+    "name": "Oner",
     "rank": {
       "rank": "IV",
       "tier": "DIAMOND",
-      "leaguePoints": 27,
+      "leaguePoints": 32,
       "wins": 5,
-      "losses": 1,
+      "losses": 0,
       "platform": "NA1"
     },
-    "puuid": "rSR5EgpWFBTampvmynI1cnFWR7Q-Au6foqL61gUOoxw0wYSEXqzX3YzQDboPXcqwFp2gSoIgHoUR_Q"
-  },
-  {
-    "riot_id": {
-      "game_name": "almid",
-      "tag_line": "1111"
-    },
-    "team": "AL",
-    "name": "Shanks",
-    "rank": {
-      "rank": "IV",
-      "tier": "DIAMOND",
-      "leaguePoints": 27,
-      "wins": 5,
-      "losses": 1,
-      "platform": "NA1"
-    },
-    "puuid": "sca4k0tfDYTgeluBV1FzJUFAq4RFGmBIiAt2RyLtKO5irwA7QE494IiXTarpXqLIxPZv5K_tURGXtQ"
+    "puuid": "1nPdsvVX_vWJFXA_XVq45rktvH6AxLMSpvCz7INEOZe_X0eZJ2aa6uwhHzNGXNWmhz6IraFYTazgpQ"
   },
   {
     "riot_id": {
@@ -698,71 +766,20 @@
   },
   {
     "riot_id": {
-      "game_name": "dsfsqw",
-      "tag_line": "123"
-    },
-    "team": "CFO",
-    "name": "Rest",
-    "rank": {
-      "rank": "I",
-      "tier": "EMERALD",
-      "leaguePoints": 77,
-      "wins": 8,
-      "losses": 5,
-      "platform": "NA1"
-    },
-    "puuid": "8whNxtJ6Jlx9sEIsT7G2l0wxgwOQUJB75LdGR0mR_BrRzXP0jxDNGDc-6Kpuku44GmjBhFgMfiYlxA"
-  },
-  {
-    "riot_id": {
       "game_name": "Bin",
       "tag_line": "K620"
     },
     "team": "BLG",
     "name": "Bin",
     "rank": {
-      "rank": "I",
-      "tier": "EMERALD",
-      "leaguePoints": 72,
-      "wins": 8,
+      "rank": "IV",
+      "tier": "DIAMOND",
+      "leaguePoints": 2,
+      "wins": 9,
       "losses": 5,
       "platform": "NA1"
     },
     "puuid": "RrJnGtKvGLjgpBUJ2tIutlcUi2FaBEFn3lzBzJWpqDKXN_J40bxunuUmBnNtEum8rXDB2P_fAFZjXQ"
-  },
-  {
-    "riot_id": {
-      "game_name": "TOPTOPTOP",
-      "tag_line": "1234"
-    },
-    "team": "T1",
-    "name": "Doran",
-    "rank": {
-      "rank": "I",
-      "tier": "EMERALD",
-      "leaguePoints": 61,
-      "wins": 7,
-      "losses": 3,
-      "platform": "NA1"
-    },
-    "puuid": "DYolfZMvP_lZvcCrqO0EewtMtYYP4qMSAAOSS5FaggYErF3Eg4IqTWzOof26iYptBcnaj3tAQf5SWA"
-  },
-  {
-    "riot_id": {
-      "game_name": "icecream",
-      "tag_line": "WTG4"
-    },
-    "team": "BLG",
-    "name": "Beichuan",
-    "rank": {
-      "rank": "I",
-      "tier": "EMERALD",
-      "leaguePoints": 45,
-      "wins": 7,
-      "losses": 5,
-      "platform": "NA1"
-    },
-    "puuid": "1be5uNx5l4SkrxJEisaxhNJxYAPbk32EGLGmcshnDA7bKCFsKqvlOFFMMKfO_vopgu9XBVGgThEyww"
   },
   {
     "riot_id": {
@@ -783,6 +800,23 @@
   },
   {
     "riot_id": {
+      "game_name": "Mai Paura",
+      "tag_line": "2025"
+    },
+    "team": "AL",
+    "name": "Tarzan",
+    "rank": {
+      "rank": "I",
+      "tier": "EMERALD",
+      "leaguePoints": 30,
+      "wins": 7,
+      "losses": 5,
+      "platform": "NA1"
+    },
+    "puuid": "RHjAryLOFSDU9DRzU4dgcmiQcL300iWQQ88xYL8nlr1bK0Np39HhwI1bt42wPtBP30muZ7k7fDTaaw"
+  },
+  {
+    "riot_id": {
       "game_name": "Hide on bush",
       "tag_line": "canad"
     },
@@ -797,23 +831,6 @@
       "platform": "NA1"
     },
     "puuid": "vKO9ryJYKQC0Nm7jJxSksYGaFvMNottaHcgFG8QbmW84E3UyBodMXzuhUssEwTYhNSFiiK5rr5jOOg"
-  },
-  {
-    "riot_id": {
-      "game_name": "Ruler",
-      "tag_line": "145"
-    },
-    "team": "GENG",
-    "name": "Ruler",
-    "rank": {
-      "rank": "I",
-      "tier": "EMERALD",
-      "leaguePoints": 27,
-      "wins": 6,
-      "losses": 4,
-      "platform": "NA1"
-    },
-    "puuid": "nn_fI719BxW_uz8a8iKPXbexVcKGWG8we2WTMxJsSDUtMGMugCG7nHjKnTf3gv2pV2AwufFKbeKg-A"
   },
   {
     "riot_id": {
@@ -834,20 +851,20 @@
   },
   {
     "riot_id": {
-      "game_name": "Mai Paura",
-      "tag_line": "2025"
+      "game_name": "Ruler",
+      "tag_line": "145"
     },
-    "team": "AL",
-    "name": "Tarzan",
+    "team": "GENG",
+    "name": "Ruler",
     "rank": {
-      "rank": "II",
+      "rank": "I",
       "tier": "EMERALD",
-      "leaguePoints": 50,
-      "wins": 4,
-      "losses": 4,
+      "leaguePoints": 7,
+      "wins": 6,
+      "losses": 6,
       "platform": "NA1"
     },
-    "puuid": "RHjAryLOFSDU9DRzU4dgcmiQcL300iWQQ88xYL8nlr1bK0Np39HhwI1bt42wPtBP30muZ7k7fDTaaw"
+    "puuid": "nn_fI719BxW_uz8a8iKPXbexVcKGWG8we2WTMxJsSDUtMGMugCG7nHjKnTf3gv2pV2AwufFKbeKg-A"
   },
   {
     "riot_id": {
@@ -857,15 +874,6 @@
     "team": "GENG",
     "name": "Chovy",
     "puuid": "bg0skT8QRtKSAtx-JlMeg05Pezv_teSoHX-FfAv2jDc6-H6ioBTrszr5S9cQLROhfyhifST6ndyKgg"
-  },
-  {
-    "riot_id": {
-      "game_name": "hi hello",
-      "tag_line": "12341"
-    },
-    "team": "T1",
-    "name": "Oner",
-    "puuid": "1nPdsvVX_vWJFXA_XVq45rktvH6AxLMSpvCz7INEOZe_X0eZJ2aa6uwhHzNGXNWmhz6IraFYTazgpQ"
   },
   {
     "riot_id": {
