@@ -496,7 +496,11 @@ def register_commands(bot):
                 wins = rank_data.get("wins", 0)
                 losses = rank_data.get("losses", 0)
                 winrate = f"{round(100 * wins / (wins + losses))}%" if (wins + losses) > 0 else "?"
-                kda = f"{p.get('kda', '?')}"
+                kda_val = p.get("kda", "?")
+                try:
+                    kda = f"{float(kda_val):.1f}"
+                except Exception:
+                    kda = "?"
                 champs = p.get("championIds", [])
                 # Convierte IDs a nombres de campeón
                 champ_names = []
