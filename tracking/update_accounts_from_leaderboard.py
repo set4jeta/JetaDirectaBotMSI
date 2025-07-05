@@ -54,11 +54,20 @@ def main():
             ):
                 entry["puuid"] = p["puuid"]
 
-    # Agrega los manuales que no están en entries (por igualdad total de dict)
-    all_entries = entries.copy()
+        # Crear un set de IDs para evitar duplicados por riot_id
+    existing_ids = {
+        (e["riot_id"]["game_name"].lower(), e["riot_id"]["tag_line"].lower())
+        for e in entries
+    }
+    
+    # Agrega los manuales que no están ya por riot_id
     for p in current_players:
-        if p not in all_entries:
-            all_entries.append(p)
+        key = (p["riot_id"]["game_name"].lower(), p["riot_id"]["tag_line"].lower())
+        if key not in existing_ids:
+            entries.append(p)
+            existing_ids.add(key)
+    
+    all_entries = entries
 
     # 4. Guarda el JSON fusionado
     with open(JSON_PATH, "w", encoding="utf-8") as f:
