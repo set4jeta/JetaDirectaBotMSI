@@ -44,27 +44,27 @@ def main():
     players = fetch_players()
     entries = [build_account_entry(p) for p in players]
 
-    # 3. Fusiona: conserva puuid si existe, pero permite duplicados de riot_id
-for entry in entries:
+   # 3. Fusiona: conserva puuid si existe, pero permite duplicados de riot_id
+    for entry in entries:
+        for p in current_players:
+            if (
+                entry["riot_id"]["game_name"].lower() == p["riot_id"]["game_name"].lower() and
+                entry["riot_id"]["tag_line"].lower() == p["riot_id"]["tag_line"].lower() and
+                "puuid" in p
+            ):
+                entry["puuid"] = p["puuid"]
+
+    # Agrega los manuales que no están en entries (por igualdad total de dict)
+    all_entries = entries.copy()
     for p in current_players:
-        if (
-            entry["riot_id"]["game_name"].lower() == p["riot_id"]["game_name"].lower() and
-            entry["riot_id"]["tag_line"].lower() == p["riot_id"]["tag_line"].lower() and
-            "puuid" in p
-        ):
-            entry["puuid"] = p["puuid"]
+        if p not in all_entries:
+            all_entries.append(p)
 
-# Agrega los manuales que no están en entries (por igualdad total de dict)
-all_entries = entries.copy()
-for p in current_players:
-    if p not in all_entries:
-        all_entries.append(p)
-
-# 4. Guarda el JSON fusionado
-with open(JSON_PATH, "w", encoding="utf-8") as f:
-    json.dump(all_entries, f, ensure_ascii=False, indent=2)
-print(f"✅ accounts.json fusionado y actualizado con {len(all_entries)} jugadores.")
-print(f"Ruta absoluta de accounts.json: {os.path.abspath(JSON_PATH)}")
+    # 4. Guarda el JSON fusionado
+    with open(JSON_PATH, "w", encoding="utf-8") as f:
+        json.dump(all_entries, f, ensure_ascii=False, indent=2)
+    print(f"✅ accounts.json fusionado y actualizado con {len(all_entries)} jugadores.")
+    print(f"Ruta absoluta de accounts.json: {os.path.abspath(JSON_PATH)}")
 
 if __name__ == "__main__":
     main()
@@ -82,5 +82,4 @@ def fetch_leaderboard():
         print("❌ Error al parsear JSON:", e)
         return []
     return data.get("players", [])    
-    
     
