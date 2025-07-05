@@ -44,31 +44,26 @@ def main():
     players = fetch_players()
     entries = [build_account_entry(p) for p in players]
 
-    # 3. Fusiona: agrega los que no están (por riot_id y tag_line)
-    def riot_id_key(p):
-        return (p["riot_id"]["game_name"].lower(), p["riot_id"]["tag_line"].lower())
-
-    # --- CAMBIO AQUÍ ---
-    # Crea un dict de los jugadores actuales por riot_id
-    current_by_riot_id = {riot_id_key(p): p for p in current_players}
-
-    # Para cada jugador nuevo, si ya existe y tiene puuid, consérvalo
+   # 3. Fusiona: conserva puuid si existe, pero permite duplicados de riot_id
     for entry in entries:
-        key = riot_id_key(entry)
-        if key in current_by_riot_id and "puuid" in current_by_riot_id[key]:
-            entry["puuid"] = current_by_riot_id[key]["puuid"]
-
-    existing_keys = {riot_id_key(p): p for p in entries}
-    # Agrega los manuales que no están en el endpoint
+        for p in current_players:
+            if (
+                entry["riot_id"]["game_name"].lower() == p["riot_id"]["game_name"].lower() and
+                entry["riot_id"]["tag_line"].lower() == p["riot_id"]["tag_line"].lower() and
+                "puuid" in p
+            ):
+                entry["puuid"] = p["puuid"]
+    
+    # Agrega los manuales que no están en entries (por igualdad total de dict)
+    all_entries = entries.copy()
     for p in current_players:
-        key = riot_id_key(p)
-        if key not in existing_keys:
-            entries.append(p)
-
+        if p not in all_entries:
+            all_entries.append(p)
+    
     # 4. Guarda el JSON fusionado
     with open(JSON_PATH, "w", encoding="utf-8") as f:
-        json.dump(entries, f, ensure_ascii=False, indent=2)
-    print(f"✅ accounts.json fusionado y actualizado con {len(entries)} jugadores.")
+        json.dump(all_entries, f, ensure_ascii=False, indent=2)
+    print(f"✅ accounts.json fusionado y actualizado con {len(all_entries)} jugadores.")
     print(f"Ruta absoluta de accounts.json: {os.path.abspath(JSON_PATH)}")
 
 if __name__ == "__main__":
